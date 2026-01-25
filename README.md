@@ -1,62 +1,99 @@
-### About
+# openastronomy.github.io
 
-This is the source for the openastronomy.github.io website.
+This is the source code for the openastronomy.org website.
 
-### Building
+## Building
 
-To build the site locally, you will need [jekyll](https://jekyllrb.com) to be installed.
-Clone this repository locally, then inside it, type:
+Requirements:
 
-```shell
-gem install bundler
-bundler install
-```
-Depending on your Ruby setup this may require superuser privileges to install to the default location, so you may want to instead use:
+- [Node.js](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
+
+Install dependencies
 
 ```shell
-
-gem install -i vendor/bundle bundler
-bundle config --local path 'vendor/bundle'
-bundle install
-
+npm install
 ```
 
-to install the dependencies locally at `vendor/bundle`.
-
-You can then build the website with:
+Build the website and output to a `html` folder
 
 ```shell
-bundle exec jekyll build
+npm run build
 ```
 
-To view the site locally, you will then need to run:
+Run the dev server
 
 ```shell
-bundle exec jekyll serve
+npm run dev
 ```
 
-this will track the changes and rebuild automatically. However, it won't reflect changes on `_config.yaml` 
-
-
-### Building using a Jekyll container
-
-```bash
-mkdir -p ../vendor/bundle # so it's available for other projects
-export JEKYLL_VERSION=3.8
-# only needs to run it once to download the dependencies
-docker run --rm -e BUNDLE_APP_CONFIG="/srv/vendor/bundle" -e BUNDLE_HOME="/srv/vendor/bundle" -e BUNDLE_PATH="/srv/vendor/bundle" --volume="$PWD:/srv/jekyll" --volume="$PWD/../vendor:/srv/vendor" -it jekyll/jekyll:$JEKYLL_VERSION  bundle install
-# build
-docker run --rm -e BUNDLE_APP_CONFIG="/srv/vendor/bundle" -e BUNDLE_HOME="/srv/vendor/bundle" -e BUNDLE_PATH="/srv/vendor/bundle" --volume="$PWD:/srv/jekyll" --volume="$PWD/../vendor:/srv/vendor" -it jekyll/jekyll:$JEKYLL_VERSION  bundle exec jekyll build
-# serve from python
-python -m http.server -d _site
-```
-
-### Submodule
-
-Note that this uses a submodule to complete the build process of the site.  So you may need to do:
+Preview the production build
 
 ```shell
-git submodule init
-git submodule update
+npm run preview
 ```
-in a fresh clone, or just the second line to update the submodule.
+
+### Formatting and linting
+
+Format the codebase
+
+```shell
+npm run format
+```
+
+Run ESLint
+
+```shell
+npm run lint
+```
+
+Auto-fix Markdown formatting issues (where supported)
+
+```shell
+npm run lint:md:fix
+```
+
+Run Astro's type/content checks
+
+```shell
+npm run astro:check
+```
+
+### CI
+
+- GitHub Actions (`.github/workflows/ci.yml`) runs linting, markdown lint, Astro checks, and link checks.
+- CircleCI (`.circleci/config.yml`) is kept for website build artifacts (`html/`) preview.
+
+### Link checks
+
+We can check both internal links + anchors and external links using a script.
+
+However, this first requies the website to be built
+
+```shell
+npm run build
+```
+
+Then for internal links
+
+```shell
+npm run linkcheck:internal
+```
+
+Then for external links
+
+```shell
+npm run linkcheck:external
+```
+
+If there are sites you need to skip, you can add regex patterns (one per line) in `linkcheck.skip.txt`
+
+There are also two environmental variables:
+
+- `LINKCHECK_ROOT=...` to point at a different build folder
+- `LINKCHECK_TIMEOUT=...` in ms for external checks
+
+### Structure
+
+- `public/` contains static assets (CSS, images, CNAME, etc)
+- `src/content/` contains posts and Markdown page content (`pages/`), including GSoC pages and projects
+- `src/pages/` contains route handlers/components (Astro files)

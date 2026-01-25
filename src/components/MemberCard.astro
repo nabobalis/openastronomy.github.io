@@ -1,0 +1,183 @@
+---
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+import icons from "../data/icons.json";
+
+type MemberDetails = {
+  name: string;
+  url: string;
+  logo: string;
+  description?: string;
+  repositories?: Record<string, string>;
+  mailinglist?: Record<string, string>;
+  chat?: Record<string, string>;
+  microblogging?: Record<string, string>;
+};
+
+const { memberKey, details: rawDetails } = Astro.props as {
+  memberKey: string;
+  details: MemberDetails;
+};
+const details = rawDetails;
+const entries = (value?: Record<string, string>) =>
+  value ? Object.entries(value) : [];
+const repositories = entries(details.repositories);
+const mailingLists = entries(details.mailinglist);
+const chats = entries(details.chat);
+const microblogging = entries(details.microblogging);
+const repoProviders = {
+  github: {
+    href: (repo: string) => `https://github.com/${repo}`,
+    icon: icons.gh_logo,
+    viewBox: "0 0 16 16",
+    height: undefined,
+  },
+  bitbucket: {
+    href: (repo: string) => `https://bitbucket.com/${repo}`,
+    icon: icons.bb_logo,
+    viewBox: "0 0 30 30",
+    height: "50%",
+  },
+  sourceforge: {
+    href: (repo: string) => `https://sourceforge.net/projects/${repo}`,
+    icon: icons.sf_logo,
+    viewBox: "0 0 15 10",
+    height: "50%",
+  },
+} as const;
+const repositoryLinks = repositories.map(([provider, repo]) => {
+  const knownProvider = repoProviders[provider as keyof typeof repoProviders];
+  if (knownProvider) {
+    return {
+      href: knownProvider.href(repo),
+      label: repo,
+      icon: knownProvider.icon,
+      viewBox: knownProvider.viewBox,
+      height: knownProvider.height,
+    };
+  }
+  return {
+    href: repo,
+    label: memberKey,
+    icon: icons.gh_logo,
+    viewBox: "0 0 16 16",
+    height: undefined,
+  };
+});
+const socialLinks = microblogging
+  .map(([platform, handle]) => {
+    if (platform === "x") {
+      return {
+        href: `https://x.com/${handle}`,
+        label: `@${handle}`,
+        icon: icons.x_logo,
+      };
+    }
+    if (platform === "mastodon") {
+      const [, username, host] = handle.split("@");
+      if (!username || !host) {
+        return null;
+      }
+      return {
+        href: `https://${host}/@${username}`,
+        label: handle,
+        icon: icons.mastodon_logo,
+      };
+    }
+    return null;
+  })
+  .filter(
+    (link): link is { href: string; label: string; icon: string } =>
+      link !== null,
+  );
+
+const memberLogoModules = import.meta.glob<{ default: ImageMetadata }>(
+  "../assets/members/*.{png,jpg,jpeg,webp,avif}",
+  { eager: true },
+);
+const memberLogos = Object.fromEntries(
+  Object.entries(memberLogoModules).map(([path, mod]) => {
+    const filename = path.split("/").pop() ?? "";
+    return [filename, mod.default];
+  }),
+) as Record<string, ImageMetadata>;
+const logoAsset = memberLogos[details.logo];
+if (!logoAsset) {
+  throw new Error(`Missing member logo asset: ${details.logo}`);
+}
+---
+
+<div class="d-flex align-items-start gap-3">
+  <a href={details.url} class="flex-shrink-0">
+    <Image
+      class="member-logo"
+      src={logoAsset}
+      alt={memberKey}
+      loading="eager"
+      fetchpriority="high"
+    />
+  </a>
+  <div id={details.name} class="flex-grow-1">
+    <a href={details.url} class="project" target="_blank">{details.name}</a>
+    <span set:html={details.description ?? ""} />
+    <br />
+    {
+      repositoryLinks.map((repository) => (
+        <a href={repository.href} target="_blank">
+          <span class="icon icon--github">
+            <svg height={repository.height} viewBox={repository.viewBox}>
+              <path fill="#333333" d={repository.icon} />
+            </svg>
+          </span>
+          {repository.label}
+        </a>
+      ))
+    }
+    <br />
+    {
+      mailingLists.length > 0 ? (
+        <>
+          <span class="icon icon-envelope" />
+          {mailingLists.map(([label, url], index) => (
+            <>
+              <a href={url}>{label}</a>
+              {index < mailingLists.length - 1 ? "," : ""}
+            </>
+          ))}
+          <br />
+        </>
+      ) : null
+    }
+    {
+      chats.length > 0 ? (
+        <>
+          <span class="icon icon--github">
+            <svg viewBox="0 0 40 40" height="50%">
+              <path fill="#333333" d={icons.irc_logo} />
+            </svg>
+          </span>
+          {chats.map(([label, url], index) => (
+            <>
+              <a href={url}>{label}</a>
+              {index < chats.length - 1 ? "," : ""}
+            </>
+          ))}
+          <br />
+        </>
+      ) : null
+    }
+    {
+      socialLinks.map((socialLink) => (
+        <a href={socialLink.href} target="_blank">
+          <span class="icon icon--github">
+            <svg height="50%" viewBox="0 0 16 16">
+              <path fill="#333333" d={socialLink.icon} />
+            </svg>
+          </span>
+          {socialLink.label}
+        </a>
+      ))
+    }
+    <br />
+  </div>
+</div>

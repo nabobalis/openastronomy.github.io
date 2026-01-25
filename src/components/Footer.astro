@@ -1,0 +1,48 @@
+---
+import { Image } from "astro:assets";
+import site from "../data/site.json";
+import icons from "../data/icons.json";
+import discourseIcon from "../assets/discourse_icon.png";
+---
+
+<footer class="site-footer">
+  <div class="wrapper">
+    <p class="tagline">
+      <strong>{site.title}</strong>: Combining the power of open source
+      astrophysics projects to empower science.
+    </p>
+    <a
+      href="https://community.openastronomy.org"
+      aria-label="OpenAstronomy Discourse"
+    >
+      <Image
+        src={discourseIcon}
+        alt="OpenAstronomy on Discourse"
+        width={16}
+        height={16}
+        loading="lazy"
+      />
+    </a>
+    <a
+      rel="me"
+      href="https://floss.social/@OpenAstronomy"
+      aria-label="OpenAstronomy on Mastodon"
+    >
+      <span class="icon-image icon--github">
+        <svg viewBox="0 0 16 16">
+          <path fill="#f9f9f9" d={icons.mastodon_logo}></path>
+        </svg>
+      </span>
+    </a>
+    <a
+      href="https://github.com/openastronomy"
+      aria-label="OpenAstronomy on GitHub"
+    >
+      <span class="icon-image icon--github">
+        <svg viewBox="0 0 16 16">
+          <path fill="#f9f9f9" d={icons.gh_logo}></path>
+        </svg>
+      </span>
+    </a>
+  </div>
+</footer>

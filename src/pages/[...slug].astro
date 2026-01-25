@@ -1,0 +1,90 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PageLayout from "../layouts/PageLayout.astro";
+import ProjectsLayout from "../layouts/ProjectsLayout.astro";
+
+type AstroComponentFactory = (...args: unknown[]) => unknown;
+type PageModule = {
+  frontmatter?: Record<string, unknown>;
+  Content: AstroComponentFactory;
+};
+
+type RoutedPage = {
+  slug: string | null;
+  module: PageModule;
+  frontmatter: Record<string, unknown>;
+};
+
+export const getStaticPaths = () => {
+  const pageModules = import.meta.glob<PageModule>("../content/pages/**/*.md", {
+    eager: true,
+  });
+
+  const toRouteSlug = (modulePath: string) => {
+    const normalizedPath = modulePath.replace(/\\\\/g, "/");
+    const marker = "/pages/";
+    const markerIndex = normalizedPath.indexOf(marker);
+    if (markerIndex === -1) return null;
+    const relativePath = normalizedPath
+      .slice(markerIndex + marker.length)
+      .replace(/\.md$/, "")
+      .replace(/\/index$/, "");
+    return relativePath === "index" ? null : relativePath;
+  };
+
+  const isProjectContent = (routeSlug: string | null) =>
+    routeSlug === "gsoc/projects" || routeSlug?.startsWith("gsoc/projects/");
+
+  const routedPages: RoutedPage[] = (
+    Object.entries(pageModules) as [string, PageModule][]
+  )
+    .map(([modulePath, module]) => {
+      const slug = toRouteSlug(modulePath);
+      if (isProjectContent(slug)) return null;
+      return { slug, module, frontmatter: module.frontmatter ?? {} };
+    })
+    .filter((page): page is RoutedPage => page !== null)
+    .sort((a, b) => (a.slug ?? "").localeCompare(b.slug ?? ""));
+
+  return routedPages.map((page) => ({
+    params: { slug: page.slug ?? undefined },
+    props: page,
+  }));
+};
+
+const { module, frontmatter } = Astro.props as RoutedPage;
+const { Content } = module;
+
+const slug = Astro.params.slug ?? null;
+const title =
+  (typeof frontmatter.title === "string" && frontmatter.title) ||
+  (typeof frontmatter.name === "string" && frontmatter.name) ||
+  undefined;
+const description =
+  typeof frontmatter.description === "string"
+    ? frontmatter.description
+    : undefined;
+const season = frontmatter.season;
+const isGsocSeasonPage = /^gsoc\/\d{4}$/.test(slug ?? "");
+---
+
+{
+  isGsocSeasonPage ? (
+    <ProjectsLayout
+      title={title}
+      description={description}
+      season={season}
+      frontmatter={frontmatter}
+    >
+      <Content />
+    </ProjectsLayout>
+  ) : slug === "gsoc" ? (
+    <PageLayout title={title} description={description}>
+      <Content />
+    </PageLayout>
+  ) : (
+    <BaseLayout title={title} description={description}>
+      <Content />
+    </BaseLayout>
+  )
+}
