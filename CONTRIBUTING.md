@@ -114,3 +114,28 @@ GitHub Actions (`.github/workflows/ci.yml`) runs on every push and pull request:
 6. Link checks (internal and external, after a production build)
 
 All steps must pass before merging.
+
+---
+
+## Syncing content from upstream
+
+This fork rewrote the site from Jekyll (the upstream) to Astro. The two branches have permanently diverged — **never run `git merge upstream/main`**, it would restore all the old Jekyll files.
+
+When upstream adds or updates GSoC project files, port them manually:
+
+```bash
+# Fetch the latest upstream changes
+git fetch upstream
+
+# See which _projects/ files changed in upstream since the last sync
+git log upstream/main ^main --oneline --name-status | grep "_projects"
+```
+
+For each new or updated `_projects/<year>/<suborg>/<file>.md` in upstream:
+
+1. Find the corresponding Astro file at `src/content/pages/gsoc/<year>/<suborg>/<file>.md`
+2. Apply the content changes (keep the Astro YAML indentation style)
+3. If the file is brand new, create it — the frontmatter schema is defined in `src/content/config.ts` and the template is at `src/content/pages/gsoc/_project_template.md`
+
+Other upstream changes (e.g. to `gsoc/display/resources/js/app.js`, `_layouts/`, `_sass/`) belong to the old Jekyll site and can be safely ignored.
+
