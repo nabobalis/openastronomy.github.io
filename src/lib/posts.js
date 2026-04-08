@@ -1,5 +1,7 @@
+/** Pads a number to 2 digits with a leading zero (e.g. 7 → "07"). */
 const pad2 = (value) => String(value).padStart(2, "0");
 
+/** Coerces a value that may already be a Date or a date string into a Date. */
 const ensureDate = (value) => {
   if (value instanceof Date) {
     return value;

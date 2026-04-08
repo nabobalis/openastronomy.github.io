@@ -1,0 +1,116 @@
+# Contributing to openastronomy.github.io
+
+This document captures the conventions used in this codebase. When adding or reviewing code, use these rules as the benchmark.
+
+---
+
+## Code style
+
+### Naming
+
+| Context | Convention | Example |
+|---|---|---|
+| JavaScript/TypeScript variables and functions | camelCase | `getPostSlug`, `seasonKey` |
+| TypeScript types and interfaces | PascalCase | `ProjectData`, `MemberLink` |
+| Astro component files | PascalCase | `MemberCard.astro`, `ProjectCard.astro` |
+| CSS class names | kebab-case | `project-card`, `member-logo` |
+| Constants that are never reassigned | UPPER_SNAKE_CASE only when a regex or truly global constant | `PROTOCOL_RE` |
+
+### Function length
+
+- Aim for **≤ 40 lines** per function.
+- If a function grows beyond that, look for a named helper to extract.
+- Long functions in `scripts/` are acceptable when they represent a single sequential workflow (e.g., the link-check crawl loop).
+
+---
+
+## Documentation
+
+### `src/lib/` (`.ts` and `.js` files)
+
+Every **exported** symbol must have a JSDoc block:
+
+```js
+/**
+ * Strips the YYYY-MM-DD date prefix from a content collection entry ID.
+ *
+ * @param {import("astro:content").CollectionEntry<"posts">} entry
+ * @returns {string} The slug without the date prefix, e.g. "my-post-title"
+ */
+export function getPostSlug(entry) { … }
+```
+
+Internal helpers (not exported) should have at least a brief inline comment if their purpose is not immediately obvious from the name.
+
+### `src/components/` and `src/layouts/` (`.astro` files)
+
+Add a block comment at the top of the frontmatter section explaining:
+
+1. What the component renders
+2. Any non-obvious prop relationships or assumptions
+
+```astro
+---
+/*
+ * ProjectCard – renders a single GSoC project summary button.
+ * Clicking opens the matching ProjectDetail panel via the shared detailId.
+ * Must be paired with a <ProjectDetail id={detailId} … /> in the same page.
+ */
+---
+```
+
+Short, self-evident page components (e.g. a page with only a title and a list) are exempt if the frontmatter is trivially readable.
+
+### `scripts/` (`.mjs` files)
+
+Every top-level function must have a JSDoc block. The module itself should have a `@fileoverview` comment at the top.
+
+### Tests (`src/lib/__tests__/`)
+
+No JSDoc is required in test files — test descriptions serve as documentation.
+
+Add a brief inline comment when test setup is non-obvious (e.g. a mock helper or a tricky fixture).
+
+---
+
+## TypeScript vs JavaScript
+
+- New files in `src/lib/` should be **TypeScript** (`.ts`).
+- Existing `.js` files in `src/lib/` stay as-is unless being rewritten from scratch.
+- Astro component frontmatter uses TypeScript types inline where needed; avoid importing from Astro runtime packages inside `src/lib/` files (keeps them unit-testable without Astro's runtime).
+
+---
+
+## Tests
+
+- Use **Vitest** (`npm test`).
+- Test files live in `src/lib/__tests__/` and mirror the lib filename (e.g. `gsoc.ts` → `gsoc.test.ts`).
+- One `describe` block per exported function.
+- Each `describe` should cover:
+  - The happy path
+  - At least one edge case or boundary value
+  - Null / undefined inputs where the function accepts optional parameters
+- Astro components are not unit-tested; test the logic extracted into `src/lib/` instead.
+
+---
+
+## Astro components
+
+- Keep frontmatter focused on **data fetching and transformation**. Move reusable logic into `src/lib/`.
+- All internal links must use `fromSiteRoot(Astro.url.pathname, "/target/")` from `src/lib/relative-paths.js`. Hardcoded absolute paths (`/foo/`) break on preview deployments.
+- Format with Prettier and lint with ESLint before committing (`npm run format && npm run lint:fix`). CI will reject uncommitted formatting changes.
+
+---
+
+## CI
+
+GitHub Actions (`.github/workflows/ci.yml`) runs on every push and pull request:
+
+1. Prettier format check
+2. ESLint
+3. Markdownlint
+4. Astro type/content checks (`astro:check`)
+5. **Unit tests** (`npm test`)
+6. Link checks (internal and external, after a production build)
+
+All steps must pass before merging.

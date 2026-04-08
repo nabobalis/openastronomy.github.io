@@ -1,4 +1,13 @@
 ---
+/*
+ * MemberCard – renders a card for a single OpenAstronomy member organisation.
+ *
+ * Displays the member's logo, name, a link to their website, and lists of
+ * repository and social links built by src/lib/members.ts.
+ *
+ * Props: member (MemberDetails object from members.json) and memberKey
+ * (the JSON key, used to resolve repository provider icons and links).
+ */
 import { Image } from "astro:assets";
 import type { ImageMetadata } from "astro";
 import icons from "../data/icons.json";

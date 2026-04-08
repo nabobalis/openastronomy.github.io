@@ -19,6 +19,10 @@ npm run astro:check  # TypeScript/Astro type checking
 # Run all checks (lint + astro:check):
 npm run check
 
+# Unit tests:
+npm test              # run all tests once
+npm run test:watch    # re-run on file change
+
 # Link checks (requires a build first):
 npm run build && npm run linkcheck:internal
 npm run build && npm run linkcheck:external
@@ -26,7 +30,16 @@ npm run build && npm run linkcheck:external
 
 **Important:** CI runs `format`, `lint:fix`, and `lint:md:fix` automatically, then **fails if those produce uncommitted changes**. Always run `npm run format && npm run lint:fix && npm run lint:md:fix` and commit the result before pushing.
 
-There is no test suite — `npm run astro:check` is the primary type/content validation step.
+## Code Standards
+
+See [`CONTRIBUTING.md`](../CONTRIBUTING.md) for the full standard. Key rules for code generation:
+
+- **Naming**: camelCase for functions/variables, PascalCase for types and Astro component files.
+- **Function length**: ≤ 40 lines; extract named helpers if longer.
+- **JSDoc**: required on every exported symbol in `src/lib/`; not required in test files.
+- **Astro components**: block comment at top of frontmatter explaining purpose + non-obvious props.
+- **TypeScript**: new `src/lib/` files must be `.ts`; never import Astro runtime packages inside `src/lib/` (breaks unit tests).
+- **Tests**: one `describe` per exported function; cover happy path + edge cases + null/undefined inputs.
 
 ## Architecture
 
