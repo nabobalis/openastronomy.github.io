@@ -49,6 +49,8 @@ jobs:
         run: npm run lint:md
       - name: Astro checks
         run: npm run astro:check
+      - name: Unit tests
+        run: npm test
 
   linkcheck:
     name: Link check (${{ matrix.mode }})

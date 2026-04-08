@@ -32,6 +32,20 @@ Preview the production build
 npm run preview
 ```
 
+### Tests
+
+Run the unit test suite (Vitest):
+
+```shell
+npm test
+```
+
+Watch mode (re-runs on file changes):
+
+```shell
+npm run test:watch
+```
+
 ### Formatting and linting
 
 Format the codebase
