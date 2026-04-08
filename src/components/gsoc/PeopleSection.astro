@@ -1,0 +1,45 @@
+---
+/**
+ * Renders a people grid section (mentors or admins) for a GSoC season page.
+ * Each person is shown with their GitHub avatar and a link to their profile.
+ */
+
+type Props = {
+  id: string;
+  heading: string;
+  intro: string;
+  handles: string[];
+};
+
+const { id, heading, intro, handles } = Astro.props;
+---
+
+<section {id} class="container">
+  <h2 aria-label={heading}>
+    <a class="gsoc-section-link" href={`#${id}`} aria-label={heading}>
+      {heading}
+    </a>
+  </h2>
+  <p>{intro}</p>
+  <div class="gsoc-people-grid">
+    {
+      handles.map((handle) => (
+        <div class="text-center">
+          <img
+            class="rounded-circle"
+            src={`https://avatars.githubusercontent.com/${handle}`}
+            alt={`@${handle} avatar`}
+            height="80"
+            width="80"
+            loading="lazy"
+          />
+          <div>
+            <a href={`https://github.com/${handle}`} target="_blank">
+              @{handle}
+            </a>
+          </div>
+        </div>
+      ))
+    }
+  </div>
+</section>

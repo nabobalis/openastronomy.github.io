@@ -1,0 +1,66 @@
+---
+/**
+ * Modal overlay for displaying a GSoC project's detail panel.
+ *
+ * The modal is initially `hidden`. When a ProjectCard button is clicked, the
+ * corresponding ProjectDetail element's inner HTML is copied into the modal
+ * content area and the modal is shown. Closing can be done via:
+ *   - The "Close" button
+ *   - Clicking the backdrop
+ *   - Pressing Escape
+ */
+---
+
+<div class="gsoc-modal" data-gsoc-modal hidden>
+  <div class="gsoc-modal-backdrop" data-gsoc-modal-close></div>
+  <div class="gsoc-modal-panel" role="dialog" aria-modal="true">
+    <button class="gsoc-modal-close" type="button" data-gsoc-modal-close>
+      Close
+    </button>
+    <div class="gsoc-modal-content"></div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const modal = document.querySelector<HTMLElement>("[data-gsoc-modal]");
+    const content = modal?.querySelector<HTMLElement>(".gsoc-modal-content");
+    const closeButtons =
+      modal?.querySelectorAll<HTMLElement>("[data-gsoc-modal-close]") ?? [];
+    const cards = document.querySelectorAll<HTMLElement>(
+      "[data-project-detail]",
+    );
+
+    if (!modal || !content) return;
+
+    const openModal = (detailId: string) => {
+      const detail = document.getElementById(detailId);
+      if (!detail) return;
+      content.innerHTML = detail.innerHTML;
+      modal.hidden = false;
+      document.body.style.overflow = "hidden";
+    };
+
+    const closeModal = () => {
+      modal.hidden = true;
+      content.innerHTML = "";
+      document.body.style.overflow = "";
+    };
+
+    cards.forEach((card) => {
+      card.addEventListener("click", () => {
+        const detailId = card.getAttribute("data-project-detail");
+        if (detailId) openModal(detailId);
+      });
+    });
+
+    closeButtons.forEach((button) => {
+      button.addEventListener("click", closeModal);
+    });
+
+    // Allow closing the modal with the Escape key
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !modal.hidden) closeModal();
+    });
+  });
+</script>

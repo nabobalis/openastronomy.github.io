@@ -20,6 +20,12 @@ export const getStaticPaths = () => {
     eager: true,
   });
 
+  /**
+   * Converts a Vite module path like `../content/pages/gsoc/index.md` to the
+   * route slug `gsoc` (i.e. the path segment after `/pages/`, without the
+   * `.md` extension or a trailing `/index`).
+   * Returns `null` for the site root (`pages/index.md`).
+   */
   const toRouteSlug = (modulePath: string) => {
     const normalizedPath = modulePath.replace(/\\\\/g, "/");
     const marker = "/pages/";
@@ -32,6 +38,11 @@ export const getStaticPaths = () => {
     return relativePath === "index" ? null : relativePath;
   };
 
+  /**
+   * GSoC project idea files live under `gsoc/<year>/<suborg>/` and are
+   * aggregated by `ProjectsLayout` — they must not become individual routes
+   * here, otherwise Astro would generate a duplicate page for each project.
+   */
   const isProjectContent = (routeSlug: string | null) =>
     routeSlug === "gsoc/projects" || routeSlug?.startsWith("gsoc/projects/");
 

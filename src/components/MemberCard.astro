@@ -2,6 +2,7 @@
 import { Image } from "astro:assets";
 import type { ImageMetadata } from "astro";
 import icons from "../data/icons.json";
+import { buildRepositoryLinks, buildSocialLinks } from "../lib/members.ts";
 
 type MemberDetails = {
   name: string;
@@ -14,82 +15,17 @@ type MemberDetails = {
   microblogging?: Record<string, string>;
 };
 
-const { memberKey, details: rawDetails } = Astro.props as {
+const { memberKey, details } = Astro.props as {
   memberKey: string;
   details: MemberDetails;
 };
-const details = rawDetails;
-const entries = (value?: Record<string, string>) =>
-  value ? Object.entries(value) : [];
-const repositories = entries(details.repositories);
-const mailingLists = entries(details.mailinglist);
-const chats = entries(details.chat);
-const microblogging = entries(details.microblogging);
-const repoProviders = {
-  github: {
-    href: (repo: string) => `https://github.com/${repo}`,
-    icon: icons.gh_logo,
-    viewBox: "0 0 16 16",
-    height: undefined,
-  },
-  bitbucket: {
-    href: (repo: string) => `https://bitbucket.com/${repo}`,
-    icon: icons.bb_logo,
-    viewBox: "0 0 30 30",
-    height: "50%",
-  },
-  sourceforge: {
-    href: (repo: string) => `https://sourceforge.net/projects/${repo}`,
-    icon: icons.sf_logo,
-    viewBox: "0 0 15 10",
-    height: "50%",
-  },
-} as const;
-const repositoryLinks = repositories.map(([provider, repo]) => {
-  const knownProvider = repoProviders[provider as keyof typeof repoProviders];
-  if (knownProvider) {
-    return {
-      href: knownProvider.href(repo),
-      label: repo,
-      icon: knownProvider.icon,
-      viewBox: knownProvider.viewBox,
-      height: knownProvider.height,
-    };
-  }
-  return {
-    href: repo,
-    label: memberKey,
-    icon: icons.gh_logo,
-    viewBox: "0 0 16 16",
-    height: undefined,
-  };
-});
-const socialLinks = microblogging
-  .map(([platform, handle]) => {
-    if (platform === "x") {
-      return {
-        href: `https://x.com/${handle}`,
-        label: `@${handle}`,
-        icon: icons.x_logo,
-      };
-    }
-    if (platform === "mastodon") {
-      const [, username, host] = handle.split("@");
-      if (!username || !host) {
-        return null;
-      }
-      return {
-        href: `https://${host}/@${username}`,
-        label: handle,
-        icon: icons.mastodon_logo,
-      };
-    }
-    return null;
-  })
-  .filter(
-    (link): link is { href: string; label: string; icon: string } =>
-      link !== null,
-  );
+
+const mailingLists = details.mailinglist
+  ? Object.entries(details.mailinglist)
+  : [];
+const chats = details.chat ? Object.entries(details.chat) : [];
+const repositoryLinks = buildRepositoryLinks(details.repositories, memberKey);
+const socialLinks = buildSocialLinks(details.microblogging);
 
 const memberLogoModules = import.meta.glob<{ default: ImageMetadata }>(
   "../assets/members/*.{png,jpg,jpeg,webp,avif}",

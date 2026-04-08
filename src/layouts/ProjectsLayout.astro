@@ -1,162 +1,75 @@
 ---
+/**
+ * Layout for GSoC season pages (e.g. /gsoc/2025/).
+ *
+ * Aggregates all project idea files for the requested season from
+ * `src/content/pages/gsoc/<year>/<suborg>/<project>.md`, then renders them
+ * as a tabbed page with three sections: Projects, Mentors, Admins.
+ *
+ * Project data transformation is handled by `src/lib/gsoc.ts`. Rendering is
+ * delegated to the focused sub-components in `src/components/gsoc/`.
+ */
 import BaseLayout from "./BaseLayout.astro";
+import ProjectCard from "../components/gsoc/ProjectCard.astro";
+import ProjectDetail from "../components/gsoc/ProjectDetail.astro";
+import PeopleSection from "../components/gsoc/PeopleSection.astro";
+import Modal from "../components/gsoc/Modal.astro";
 import admins from "../data/gsoc-admins.json";
 import members from "../data/members.json";
 import { fromSiteRoot } from "../lib/relative-paths.js";
-
-type AstroComponentFactory = (...args: unknown[]) => unknown;
-type ProjectModule = {
-  frontmatter?: Record<string, unknown>;
-  Content: AstroComponentFactory;
-};
+import { buildProject, isProjectFile } from "../lib/gsoc.ts";
+import type { ProjectModule } from "../lib/gsoc.ts";
 
 const frontmatter = Astro.props.frontmatter ?? {};
 const pagePath = Astro.url.pathname;
 const title = Astro.props.title ?? frontmatter.title;
 const season = Astro.props.season ?? frontmatter.season;
-const seasonKeyFromFrontmatter = String(season ?? "").trim();
+
+// Prefer the year extracted from the URL path over the frontmatter `season`
+// field, since the URL is authoritative and avoids stale frontmatter issues.
 const seasonMatch = Astro.url.pathname.match(/\/gsoc\/(\d{4})(?:\/|$)/);
 const seasonKey = (
-  seasonMatch ? seasonMatch[1] : seasonKeyFromFrontmatter
+  seasonMatch ? seasonMatch[1] : String(season ?? "").trim()
 ).trim();
+
 const pageTitle = seasonKey
   ? title
     ? `${title} (${seasonKey})`
     : `GSoC ${seasonKey}`
   : (title ?? "OpenAstronomy");
+
+// Eagerly load all GSoC markdown files; filter and transform in one pass below.
 const projectModules = import.meta.glob<ProjectModule>(
   "../content/pages/gsoc/**/*.md",
   { eager: true },
 );
+
 const memberLookup = members as Record<string, { name?: string }>;
 const adminLookup = admins as Record<string, string[]>;
 
-const normalizeArray = (value: unknown): string[] => {
-  const values = Array.isArray(value)
-    ? value
-    : value !== null && value !== undefined && value !== ""
-      ? [value]
-      : [];
-  return values
-    .map((item) => String(item ?? "").trim())
-    .filter((item) => {
-      const normalized = item.toLowerCase();
-      if (!normalized) {
-        return false;
-      }
-      return !["none", "n/a", "na", "null"].includes(normalized);
-    });
-};
-
-const slugify = (value: string) =>
-  value
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-
-const formatMemberLink = (value: string) => {
-  const key = String(value);
-  const member = memberLookup[key];
-  if (member?.name) {
-    return {
-      label: member.name,
-      href: fromSiteRoot(
-        pagePath,
-        `/members/#${encodeURIComponent(member.name)}`,
-      ),
-    };
-  }
-  return { label: key, href: null };
-};
-const joinableRows = (rows: Array<{ label: string; values: string[] }>) =>
-  rows.filter((row) => row.values.length > 0);
-
 const projects = (Object.entries(projectModules) as [string, ProjectModule][])
-  .filter(([path]) => {
-    const normalizedPath = path.replace(/\\\\/g, "/");
-    const parts = normalizedPath.split("/");
-    const gsocIndex = parts.lastIndexOf("gsoc");
-    if (gsocIndex === -1) {
-      return false;
-    }
-    const year = parts[gsocIndex + 1];
-    if (!/^\d{4}$/.test(year ?? "")) {
-      return false;
-    }
-    if (parts.length < gsocIndex + 4) {
-      return false;
-    }
-    const filename = parts[parts.length - 1] ?? "";
-    if (filename.startsWith("_") || filename === "index.md") {
-      return false;
-    }
-    return year === seasonKey;
-  })
-  .map(([path, mod]) => {
-    const data = mod.frontmatter ?? {};
-    const normalizedPath = path.replace(/\\\\/g, "/");
-    const parts = normalizedPath.split("/");
-    const gsocIndex = parts.lastIndexOf("gsoc");
-    const year = parts[gsocIndex + 1] ?? seasonKey;
-    const suborg = parts[gsocIndex + 2] ?? "";
-    const fileSlug = (parts[parts.length - 1] ?? "").replace(/\.md$/, "");
-    const fallbackName = fileSlug;
-    const name =
-      typeof data.name === "string" && data.name.trim()
-        ? data.name.trim()
-        : fallbackName;
-    const projectPath = `/gsoc/${year}/${suborg}/${fileSlug}/`;
-    const desc = typeof data.desc === "string" ? data.desc : "";
-    const requirements = normalizeArray(data.requirements);
-    const mentors = normalizeArray(data.mentors);
-    const initiatives = normalizeArray(data.initiatives);
-    const projectSize = normalizeArray(data.project_size);
-    const tags = normalizeArray(data.tags);
-    const collaborators = normalizeArray(data.collaborating_projects).map(
-      formatMemberLink,
-    );
-    const issues = normalizeArray(data.issues);
-    const detailRows = joinableRows([
-      { label: "Initiatives", values: initiatives },
-      { label: "Project size", values: projectSize },
-      { label: "Tags", values: tags },
-    ]);
-    const cardRows = joinableRows([
-      { label: "Mentors", values: mentors },
-      ...detailRows,
-    ]);
-
-    return {
-      name,
-      anchor: slugify(name),
-      href: fromSiteRoot(pagePath, projectPath),
-      desc,
-      requirements,
-      mentors,
-      collaborators,
-      issues,
-      cardRows,
-      detailRows,
-      Content: mod.Content,
-    };
-  });
-
-projects.sort((a, b) => a.name.localeCompare(b.name));
+  .filter(([path]) => isProjectFile(path.replace(/\\/g, "/"), seasonKey))
+  .map(([path, mod]) =>
+    buildProject(path, mod, seasonKey, memberLookup, pagePath, fromSiteRoot),
+  )
+  .sort((a, b) => a.name.localeCompare(b.name));
 
 const mentors = Array.from(
-  new Set(projects.flatMap((project) => project.mentors).filter(Boolean)),
+  new Set(projects.flatMap((p) => p.mentors).filter(Boolean)),
 ).sort((a, b) => a.localeCompare(b));
 
 const adminHandles = adminLookup[seasonKey] ?? [];
+
 const projectsSectionLabel = `GSoC Projects for ${seasonKey}`;
 const mentorsSectionLabel = `Mentors for ${seasonKey}`;
 const adminsSectionLabel = `Admins for ${seasonKey}`;
+
 const sectionLinks = [
   { id: "projects", label: "Projects", heading: projectsSectionLabel },
   { id: "mentors", label: "Mentors", heading: mentorsSectionLabel },
   { id: "admins", label: "Admins", heading: adminsSectionLabel },
 ];
+
 const peopleSections = [
   {
     id: "mentors",
@@ -201,228 +114,28 @@ const peopleSections = [
         {projects.length === 0 ? <p>No projects listed yet.</p> : null}
         <div class="gsoc-projects-grid">
           {
-            projects.map((project) => {
-              const ProjectContent = project.Content;
-              const detailId = `detail-${project.anchor}`;
-              return (
-                <>
-                  <button
-                    class="gsoc-project-card"
-                    type="button"
-                    data-project-detail={detailId}
-                  >
-                    <h3>{project.name}</h3>
-                    {project.desc ? (
-                      <p class="gsoc-project-desc">{project.desc}</p>
-                    ) : null}
-                    {project.cardRows.map((row) => (
-                      <div class="gsoc-card-row">
-                        <span class="gsoc-card-label">{row.label}:</span>
-                        <span>{row.values.join(", ")}</span>
-                      </div>
-                    ))}
-                    {project.collaborators.length > 0 ? (
-                      <div class="gsoc-card-row">
-                        <span class="gsoc-card-label">Project:</span>
-                        <span>
-                          {project.collaborators.map((collaborator, index) => (
-                            <>
-                              {index > 0 ? ", " : ""}
-                              {collaborator.href ? (
-                                <a href={collaborator.href}>
-                                  {collaborator.label}
-                                </a>
-                              ) : (
-                                collaborator.label
-                              )}
-                            </>
-                          ))}
-                        </span>
-                      </div>
-                    ) : null}
-                  </button>
-
-                  <div class="gsoc-project-detail" id={detailId} hidden>
-                    <p class="gsoc-project-detail-link">
-                      <a href={project.href}>Open project page</a>
-                    </p>
-                    <h3>{project.name}</h3>
-                    {project.desc ? <p>{project.desc}</p> : null}
-
-                    {project.requirements.length > 0 ? (
-                      <div>
-                        <strong>Requirements:</strong>
-                        <ul>
-                          {project.requirements.map((req) => (
-                            <li>{req}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    ) : null}
-
-                    {project.detailRows.map((row) => (
-                      <div>
-                        <strong>{row.label}:</strong> {row.values.join(", ")}
-                      </div>
-                    ))}
-
-                    {project.mentors.length > 0 ? (
-                      <div>
-                        <strong>Mentors:</strong>{" "}
-                        {project.mentors.map((mentor, index) => (
-                          <>
-                            {index > 0 ? ", " : ""}
-                            <a
-                              href={`https://github.com/${mentor}`}
-                              target="_blank"
-                            >
-                              @{mentor}
-                            </a>
-                          </>
-                        ))}
-                      </div>
-                    ) : null}
-
-                    {project.issues.length > 0 ? (
-                      <div>
-                        <strong>Related issues:</strong>
-                        <ul>
-                          {project.issues.map((issue) => (
-                            <li>
-                              <a href={issue} target="_blank">
-                                {issue}
-                              </a>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ) : null}
-
-                    {project.collaborators.length > 0 ? (
-                      <div>
-                        <strong>Collaborating projects:</strong>{" "}
-                        {project.collaborators.map((collaborator, index) => (
-                          <>
-                            {index > 0 ? ", " : ""}
-                            {collaborator.href ? (
-                              <a href={collaborator.href}>
-                                {collaborator.label}
-                              </a>
-                            ) : (
-                              collaborator.label
-                            )}
-                          </>
-                        ))}
-                      </div>
-                    ) : null}
-
-                    <div class="gsoc-project-body">
-                      <ProjectContent />
-                    </div>
-                  </div>
-                </>
-              );
-            })
+            projects.map((project) => (
+              <>
+                <ProjectCard project={project} />
+                <ProjectDetail project={project} />
+              </>
+            ))
           }
         </div>
       </section>
 
       {
         peopleSections.map((section) => (
-          <section id={section.id} class="container">
-            <h2 aria-label={section.heading}>
-              <a
-                class="gsoc-section-link"
-                href={`#${section.id}`}
-                aria-label={section.heading}
-              >
-                {section.heading}
-              </a>
-            </h2>
-            <p>{section.intro}</p>
-            <div class="gsoc-people-grid">
-              {section.handles.map((handle) => (
-                <div class="text-center">
-                  <img
-                    class="rounded-circle"
-                    src={`https://avatars.githubusercontent.com/${handle}`}
-                    alt={`@${handle} avatar`}
-                    height="80"
-                    width="80"
-                    loading="lazy"
-                  />
-                  <div>
-                    <a href={`https://github.com/${handle}`} target="_blank">
-                      @{handle}
-                    </a>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
+          <PeopleSection
+            id={section.id}
+            heading={section.heading}
+            intro={section.intro}
+            handles={section.handles}
+          />
         ))
       }
 
-      <div class="gsoc-modal" data-gsoc-modal hidden>
-        <div class="gsoc-modal-backdrop" data-gsoc-modal-close></div>
-        <div class="gsoc-modal-panel" role="dialog" aria-modal="true">
-          <button class="gsoc-modal-close" type="button" data-gsoc-modal-close
-            >Close</button
-          >
-          <div class="gsoc-modal-content"></div>
-        </div>
-      </div>
+      <Modal />
     </div>
   </div>
-
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const modal = document.querySelector<HTMLElement>("[data-gsoc-modal]");
-      const content = modal?.querySelector<HTMLElement>(".gsoc-modal-content");
-      const closeButtons =
-        modal?.querySelectorAll<HTMLElement>("[data-gsoc-modal-close]") ?? [];
-      const cards = document.querySelectorAll<HTMLElement>(
-        "[data-project-detail]",
-      );
-
-      if (!modal || !content) {
-        return;
-      }
-
-      const openModal = (detailId: string) => {
-        const detail = document.getElementById(detailId);
-        if (!detail) {
-          return;
-        }
-        content.innerHTML = detail.innerHTML;
-        modal.hidden = false;
-        document.body.style.overflow = "hidden";
-      };
-
-      const closeModal = () => {
-        modal.hidden = true;
-        content.innerHTML = "";
-        document.body.style.overflow = "";
-      };
-
-      cards.forEach((card) => {
-        card.addEventListener("click", () => {
-          const detailId = card.getAttribute("data-project-detail");
-          if (detailId) {
-            openModal(detailId);
-          }
-        });
-      });
-
-      closeButtons.forEach((button) => {
-        button.addEventListener("click", closeModal);
-      });
-
-      document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape" && !modal.hidden) {
-          closeModal();
-        }
-      });
-    });
-  </script>
 </BaseLayout>
