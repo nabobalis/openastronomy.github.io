@@ -1,4 +1,14 @@
 ---
+/*
+ * Head – renders the <head> element for every page.
+ *
+ * Builds canonical URL, Open Graph tags, favicon, and a CSS stylesheet link.
+ * Picks one of two background images at random via an inline script so the
+ * choice is made on the client without a layout shift.
+ *
+ * Props: pageTitle (overrides site default), description (overrides site default).
+ * Uses fromSiteRoot() for all asset hrefs so paths work on preview deployments.
+ */
 import site from "../data/site.json";
 import members from "../data/members.json";
 import { fromSiteRoot } from "../lib/relative-paths.js";

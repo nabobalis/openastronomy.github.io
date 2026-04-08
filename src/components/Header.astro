@@ -1,4 +1,13 @@
 ---
+/*
+ * Header – site-wide navigation bar.
+ *
+ * Merges page_links (internal, localised with localizeHref) and nav_links
+ * (external, used as-is) from site.json into a single nav list.
+ *
+ * Includes an inline <script> that handles the mobile hamburger toggle and
+ * closes the menu when a link is clicked or the user clicks outside.
+ */
 import { Image } from "astro:assets";
 import site from "../data/site.json";
 import { fromSiteRoot, localizeHref } from "../lib/relative-paths.js";
