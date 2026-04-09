@@ -17,17 +17,19 @@ If you are selected by OpenAstronomy, you will become a GSoC contributor.
 
 ## What is OpenAstronomy (OA)?
 
-OpenAstronomy is an umbrella organization which acts as an interface between the Google Summer of Code and several open source, open development projects in the astronomical community, including [astropy], [sunpy], and [several other astronomy projects][oa members].
+OpenAstronomy is an umbrella organization which acts as an interface between the Google Summer of Code and several open source, open development projects in the astronomical community, including [astropy], [sunpy], and [many other astronomy projects][oa members].
 It coordinates mentors and projects for Google Summer of Code mentorships related to astronomy.
 
 ## What is the application process?
 
-You must submit your application to the [Google Summer of Code][GSoC], but it's preferable that you also share it well before the deadline with your potential project mentors or the rest of the community.
-Then they will be able to give you feedback before officially submitting it.
-While OpenAstronomy has a [application template on the wiki][application], it is very possible that the project has its own template and you should use that instead.
-You can also find applications from previous years in the GitHub wiki pages of some of the OpenAstronomy members.
+You must submit your application to the [Google Summer of Code][GSoC], but it is very important that you also share it well before the deadline with your potential project mentors and the rest of the community.
+They will be able to give you feedback before officially submitting it, but this is difficult to do if a propsoal draft is shared with less than 7 days before the deadline.
 
-The complete details on applying are in the [GSoC Contributor Guide].
+The [application] process is currently described by our [gsoc-proposals repository](https://github.com/OpenAstronomy/gsoc-proposals) and is required to be accepted.
+It is very possible that the project has its own template and you can use that when submitting to GSOC but for the gsoc-proposals repository, you must follow that template.
+
+You can also find applications from previous years in the GitHub wiki pages of some of the OpenAstronomy members.
+The more details on applying are in the [GSoC Contributor Guide].
 
 ## Who is eligible to apply to GSoC?
 

@@ -102,7 +102,7 @@ The dream contributor is that one that becomes mentor in the following years.
 
 Contributors will apply via the [GSoC portal][GSOC].
 If it's not there, their application doesn't count.
-OpenAstronomy offers [a template for the contributors to apply][template-application-wiki]. S
+OpenAstronomy offers [a template for the contributors to apply][template-application-wiki].
 Some sub-orgs require they post publicly their application on their wiki ([see for example SunPy's](https://github.com/sunpy/sunpy/wiki/GSoC)), others don't.
 In any case, it's good to encourage the contributors to share the draft of their applications with the mentors, so they can improve it before the deadline.
 

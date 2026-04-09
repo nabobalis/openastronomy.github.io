@@ -11,7 +11,7 @@ title: Google Summer of Code
 OpenAstronomy is an umbrella organization which collects project ideas from any of its members and has been a mentoring organization since 2016.
 
 Contributor applications to OpenAstronomy projects follows the same rules as the [Python Software Foundation] and the [GSoC Contributor Guide].
-[We have also our own guide on what we consider a good application for OpenAstronomy.][OpenAstronomy Contributor Guide].
+[We have also our own guide on what we consider a good application for OpenAstronomy.][OpenAstronomy Contributor Guide]
 
 All contributors blogs are collected on the [OpenAstronomy Universe] site.
 
