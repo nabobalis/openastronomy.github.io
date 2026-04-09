@@ -23,10 +23,13 @@ jobs:
           command: |
             node scripts/circleci-preview.mjs \
               "/output/job/${CIRCLE_WORKFLOW_JOB_ID}/artifacts/0/html"
-
       - store_artifacts:
-          path: ~/repo/html
+          path: html
           destination: html
+
+      - run:
+          name: "Preview URL"
+          command: echo "${CIRCLE_BUILD_URL}/artifacts/${CIRCLE_NODE_INDEX}/html/index.html"
 
 workflows:
   build_website:
