@@ -52,7 +52,7 @@ Add a block comment at the top of the frontmatter section explaining:
 ```astro
 ---
 /*
- * ProjectCard – renders a single GSoC project summary button.
+ * ProjectCard - renders a single GSoC project summary button.
  * Clicking opens the matching ProjectDetail panel via the shared detailId.
  * Must be paired with a <ProjectDetail id={detailId} … /> in the same page.
  */

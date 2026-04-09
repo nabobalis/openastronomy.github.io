@@ -16,7 +16,7 @@ x\.com
 # GNU project website — returns HTTP 403 for headless fetch (WAF false positive).
 www\.gnu\.org
 
-# --- Dead domains from historical GSoC proposals (2015–2022) ---
+# --- Dead domains from historical GSoC proposals (2015-2022) ---
 # These links were valid when the proposals were written but the projects/domains
 # are no longer active. Skipped so archival content remains unchanged.
 

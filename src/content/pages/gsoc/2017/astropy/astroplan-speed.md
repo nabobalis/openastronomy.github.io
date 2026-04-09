@@ -23,7 +23,7 @@ collaborating_projects:
 
 You want to schedule observations of one thousand targets over the next month. You are given one hour. Can you help us make astroplan the tool that's up to the task?
 
-Last summer's astroplan GSoC student began implementing a module for [scheduling astronomical observations](http://astroplan.readthedocs.io/en/latest/tutorials/scheduling.html). These scheduling operations require many calls to basic coordinate calculations – e.g. when does this target rise/set? – which can be optimized at several places within astropy core in the [`SkyCoord`](http://docs.astropy.org/en/stable/api/astropy.coordinates.SkyCoord.html) object and within the astroplan package to speed up astroplan's schedulers. Some goals of this project are to:
+Last summer's astroplan GSoC student began implementing a module for [scheduling astronomical observations](http://astroplan.readthedocs.io/en/latest/tutorials/scheduling.html). These scheduling operations require many calls to basic coordinate calculations - e.g. when does this target rise/set? - which can be optimized at several places within astropy core in the [`SkyCoord`](http://docs.astropy.org/en/stable/api/astropy.coordinates.SkyCoord.html) object and within the astroplan package to speed up astroplan's schedulers. Some goals of this project are to:
 
 1. Profile astroplan's rise/set functions and identify inefficiencies in the `SkyCoord` object
 2. Make efficiency improvements wherever possible with the findings of Step 1
