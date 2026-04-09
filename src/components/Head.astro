@@ -25,11 +25,11 @@ const canonicalUrl = new URL(Astro.url.pathname, canonicalBase).toString();
 const faviconHref = fromSiteRoot(pagePath, logoWhite.src);
 const overridesHref = fromSiteRoot(pagePath, "/css/astro-overrides.css");
 const ogImageUrl = new URL(
-  "/og/openastronomy-og.png",
+  "/og/openastronomy-og.jpg",
   canonicalBase,
 ).toString();
-const ogImageWidth = 1308;
-const ogImageHeight = 629;
+const ogImageWidth = 1200;
+const ogImageHeight = 630;
 const backgroundOptions = [
   fromSiteRoot(pagePath, backgroundAp.src),
   fromSiteRoot(pagePath, backgroundSp.src),
