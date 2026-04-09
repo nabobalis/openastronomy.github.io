@@ -31,8 +31,6 @@ collaborating_projects:
   - reltrans
 ---
 
-## Profiling and Performance Optimization of Reltrans
-
 #### Description
 
 Reltrans is a publicly available, semi-analytical model for X-ray reverberation mapping

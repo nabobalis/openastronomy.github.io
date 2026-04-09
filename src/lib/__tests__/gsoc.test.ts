@@ -172,10 +172,7 @@ describe("joinableRows", () => {
 describe("isProjectFile", () => {
   it("returns true for a valid project file", () => {
     expect(
-      isProjectFile(
-        "../content/pages/gsoc/2025/sunpy/my-project.md",
-        "2025",
-      ),
+      isProjectFile("../content/pages/gsoc/2025/sunpy/my-project.md", "2025"),
     ).toBe(true);
   });
 
@@ -187,32 +184,24 @@ describe("isProjectFile", () => {
 
   it("returns false for template files starting with _", () => {
     expect(
-      isProjectFile(
-        "../content/pages/gsoc/_project_template.md",
-        "2025",
-      ),
+      isProjectFile("../content/pages/gsoc/_project_template.md", "2025"),
     ).toBe(false);
   });
 
   it("returns false for files in the wrong year", () => {
     expect(
-      isProjectFile(
-        "../content/pages/gsoc/2024/sunpy/my-project.md",
-        "2025",
-      ),
+      isProjectFile("../content/pages/gsoc/2024/sunpy/my-project.md", "2025"),
     ).toBe(false);
   });
 
   it("returns false for files at the season root (no suborg subdir)", () => {
     // gsoc / 2025 / project.md — only 3 parts after gsoc, needs 4
-    expect(
-      isProjectFile("../content/pages/gsoc/2025/project.md", "2025"),
-    ).toBe(false);
+    expect(isProjectFile("../content/pages/gsoc/2025/project.md", "2025")).toBe(
+      false,
+    );
   });
 
   it("returns false when the path contains no gsoc segment", () => {
-    expect(isProjectFile("../content/pages/other/file.md", "2025")).toBe(
-      false,
-    );
+    expect(isProjectFile("../content/pages/other/file.md", "2025")).toBe(false);
   });
 });

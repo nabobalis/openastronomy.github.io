@@ -30,8 +30,6 @@ collaborating_projects:
   - juliaAstro
 ---
 
-## Spectral timing in Julia
-
 #### Description
 
 The analysis of time series from astronomical observations in the X-rays is an
@@ -45,7 +43,7 @@ allow to understand the variability at different energies.
 This project is about the implementation of a basic set of X-ray timing analysis
 operations in Julia, continuing the porting of the core operations from the
 `stingray` Python package [initiated during Google Summer of Code 2022 and 2025]
-(https://github.com/StingraySoftware/Stingray.jl)
+(<https://github.com/StingraySoftware/Stingray.jl>)
 
 #### Milestones
 

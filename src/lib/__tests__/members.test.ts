@@ -15,22 +15,25 @@ describe("buildRepositoryLinks", () => {
   });
 
   it("builds a github link from a known provider", () => {
-    const [link] = buildRepositoryLinks({ github: "astropy/astropy" }, "astropy");
+    const [link] = buildRepositoryLinks(
+      { github: "astropy/astropy" },
+      "astropy",
+    );
     expect(link.href).toBe("https://github.com/astropy/astropy");
     expect(link.label).toBe("astropy/astropy");
   });
 
   it("builds a bitbucket link from a known provider", () => {
-    const [link] = buildRepositoryLinks({ bitbucket: "myteam/myrepo" }, "myorg");
+    const [link] = buildRepositoryLinks(
+      { bitbucket: "myteam/myrepo" },
+      "myorg",
+    );
     expect(link.href).toBe("https://bitbucket.com/myteam/myrepo");
     expect(link.label).toBe("myteam/myrepo");
   });
 
   it("builds a sourceforge link from a known provider", () => {
-    const [link] = buildRepositoryLinks(
-      { sourceforge: "my-project" },
-      "myorg",
-    );
+    const [link] = buildRepositoryLinks({ sourceforge: "my-project" }, "myorg");
     expect(link.href).toBe("https://sourceforge.net/projects/my-project");
     expect(link.label).toBe("my-project");
   });

@@ -62,7 +62,9 @@ describe("getPostSlug", () => {
 
 describe("getPostDateParts", () => {
   it("returns correct UTC year/month/day from a Date object", () => {
-    const entry = makeEntry("foo.md", { date: new Date("2024-03-05T00:00:00Z") });
+    const entry = makeEntry("foo.md", {
+      date: new Date("2024-03-05T00:00:00Z"),
+    });
     const { year, month, day } = getPostDateParts(entry);
     expect(year).toBe("2024");
     expect(month).toBe("03");
@@ -70,7 +72,9 @@ describe("getPostDateParts", () => {
   });
 
   it("pads single-digit months and days with leading zeros", () => {
-    const entry = makeEntry("foo.md", { date: new Date("2024-01-07T00:00:00Z") });
+    const entry = makeEntry("foo.md", {
+      date: new Date("2024-01-07T00:00:00Z"),
+    });
     const { month, day } = getPostDateParts(entry);
     expect(month).toBe("01");
     expect(day).toBe("07");
@@ -113,7 +117,9 @@ describe("getPostUrl", () => {
 
   it("includes leading and trailing slashes", () => {
     const url = getPostUrl(
-      makeEntry("2020-01-01-test.md", { date: new Date("2020-01-01T00:00:00Z") }),
+      makeEntry("2020-01-01-test.md", {
+        date: new Date("2020-01-01T00:00:00Z"),
+      }),
     );
     expect(url).toMatch(/^\//);
     expect(url).toMatch(/\/$/);

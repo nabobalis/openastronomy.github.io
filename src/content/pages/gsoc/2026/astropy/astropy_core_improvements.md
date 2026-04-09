@@ -41,8 +41,6 @@ collaborating_projects:
 
 # Hardening astropy's core stability
 
-## Description
-
 Astropy is a mixed-language code base. Most of it is pure Python, but many hotpaths are
 written in lower level languages (Cython, C and C++). The former is where the vast
 majority of past and current development is conducted, while the latter in much more

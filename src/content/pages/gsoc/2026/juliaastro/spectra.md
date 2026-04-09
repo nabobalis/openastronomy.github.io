@@ -27,8 +27,6 @@ collaborating_projects:
   - juliaAstro
 ---
 
-## Spectra.jl across the electromagnetic spectrum
-
 #### Description
 
 When we observe a star, we can filter particular colours to learn about the
@@ -60,7 +58,7 @@ metadata, and for performing basic manipulations and first-look analyses.
 
 For some further discussion, see:
 
-- https://github.com/JuliaAstro/Spectra.jl/pull/24
+- <https://github.com/JuliaAstro/Spectra.jl/pull/24>
 
 #### Project Milestones
 

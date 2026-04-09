@@ -39,8 +39,6 @@ collaborating_projects:
   - lincc-frameworks
 ---
 
-## pyarrow Improvements for Astronomy
-
 #### Description
 
 Modern astronomical surveys produce catalogs containing billions of objects, each with associated time-series (light curves) and spectral measurements. Tools like [HATS (Hierarchical Adaptive Tiling Scheme)](https://hats.readthedocs.io/en/latest/), [LSDB](https://lsdb.io), and [nested-pandas](https://github.com/lincc-frameworks/nested-pandas) enable scalable analysis of these catalogs by storing variable-length nested data (light curves, spectra) directly in Parquet files using [pyarrow](https://github.com/apache/arrow)'s nested array types.

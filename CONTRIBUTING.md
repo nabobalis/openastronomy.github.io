@@ -8,13 +8,13 @@ This document captures the conventions used in this codebase. When adding or rev
 
 ### Naming
 
-| Context | Convention | Example |
-|---|---|---|
-| JavaScript/TypeScript variables and functions | camelCase | `getPostSlug`, `seasonKey` |
-| TypeScript types and interfaces | PascalCase | `ProjectData`, `MemberLink` |
-| Astro component files | PascalCase | `MemberCard.astro`, `ProjectCard.astro` |
-| CSS class names | kebab-case | `project-card`, `member-logo` |
-| Constants that are never reassigned | UPPER_SNAKE_CASE only when a regex or truly global constant | `PROTOCOL_RE` |
+| Context                                       | Convention                                                  | Example                                 |
+| --------------------------------------------- | ----------------------------------------------------------- | --------------------------------------- |
+| JavaScript/TypeScript variables and functions | camelCase                                                   | `getPostSlug`, `seasonKey`              |
+| TypeScript types and interfaces               | PascalCase                                                  | `ProjectData`, `MemberLink`             |
+| Astro component files                         | PascalCase                                                  | `MemberCard.astro`, `ProjectCard.astro` |
+| CSS class names                               | kebab-case                                                  | `project-card`, `member-logo`           |
+| Constants that are never reassigned           | UPPER_SNAKE_CASE only when a regex or truly global constant | `PROTOCOL_RE`                           |
 
 ### Function length
 
@@ -112,13 +112,13 @@ Add a brief inline comment when test setup is non-obvious (e.g. a mock helper or
 
 GitHub Actions (`.github/workflows/ci.yml`) runs on every push and pull request. Jobs run in parallel where possible:
 
-| Job | What it checks |
-|---|---|
-| `format` | Prettier format |
-| `lint` | ESLint (warnings treated as errors) + Markdownlint |
-| `typecheck` | Astro type/content checks (`astro:check`) |
-| `test` | Unit tests (`npm test`) |
-| `build` | Production build; output uploaded as a shared artifact |
+| Job              | What it checks                                               |
+| ---------------- | ------------------------------------------------------------ |
+| `format`         | Prettier format                                              |
+| `lint`           | ESLint (warnings treated as errors) + Markdownlint           |
+| `typecheck`      | Astro type/content checks (`astro:check`)                    |
+| `test`           | Unit tests (`npm test`)                                      |
+| `build`          | Production build; output uploaded as a shared artifact       |
 | `linkcheck` (×2) | Internal and external links, using the shared build artifact |
 
 All jobs must pass before merging. The `linkcheck` jobs wait for `build` and all quality jobs.
@@ -146,4 +146,3 @@ For each new or updated `_projects/<year>/<suborg>/<file>.md` in upstream:
 3. If the file is brand new, create it — the frontmatter schema is defined in `src/content/config.ts` and the template is at `src/content/pages/gsoc/_project_template.md`
 
 Other upstream changes (e.g. to `gsoc/display/resources/js/app.js`, `_layouts/`, `_sass/`) belong to the old Jekyll site and can be safely ignored.
-

@@ -34,8 +34,6 @@ collaborating_projects:
   - reltrans
 ---
 
-## Interactive Tutorials and Automated Testing for the Reltrans Code
-
 #### Description
 
 Reltrans is a publicly available, semi-analytical model for X-ray reverberation mapping

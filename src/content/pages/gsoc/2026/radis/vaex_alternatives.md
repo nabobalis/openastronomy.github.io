@@ -34,8 +34,6 @@ collaborating_projects:
   - radis
 ---
 
-## Integrate a modern lazy-loading alternative for large-scale spectroscopic database processing
-
 #### Description
 
 The RADIS code was developed for the characterization of plasmas, flames, and atmospheres.

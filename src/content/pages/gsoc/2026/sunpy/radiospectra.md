@@ -34,8 +34,6 @@ collaborating_projects:
   - sunpy
 ---
 
-## Improving radiospectra's functionality and interoperability
-
 #### Description
 
 Solar radio spectrograms are a fundamental data product for studying energetic and transient processes in the solar atmosphere. The `sunpy/radiospectra` package provides foundational support for working with such data, but its current capabilities are limited and not well aligned with modern SunPy and scientific Python data models.
