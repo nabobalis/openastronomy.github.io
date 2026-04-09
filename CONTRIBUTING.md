@@ -146,3 +146,29 @@ For each new or updated `_projects/<year>/<suborg>/<file>.md` in upstream:
 3. If the file is brand new, create it — the frontmatter schema is defined in `src/content/config.ts` and the template is at `src/content/pages/gsoc/_project_template.md`
 
 Other upstream changes (e.g. to `gsoc/display/resources/js/app.js`, `_layouts/`, `_sass/`) belong to the old Jekyll site and can be safely ignored.
+
+---
+
+## Updating dependencies
+
+This is a static site — npm packages only affect developers and CI, not end users. **Update once per GSoC cycle** (roughly every February before the season begins) rather than continuously.
+
+GitHub Actions versions are kept up to date automatically via Dependabot (monthly). npm packages are updated manually:
+
+```bash
+# See what has newer versions available
+npx npm-check-updates
+
+# Bump all versions in package.json (still respects semver)
+npx npm-check-updates -u
+
+# Install the new versions and update the lock file
+npm install
+
+# Verify nothing broke
+npm run build && npm test
+```
+
+Commit both `package.json` and `package-lock.json` together. If `npm run build` or `npm test` fails after the update, check the changelog for the offending package and either fix the issue or pin that package back to the previous version.
+
+**Security alerts**: if GitHub raises a Dependabot security alert for a specific npm package, fix that immediately regardless of the regular update schedule.
