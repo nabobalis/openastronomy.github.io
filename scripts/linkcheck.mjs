@@ -407,6 +407,7 @@ const checkExternalUrl = async (url, timeoutMs) => {
 /**
  * Checks all external HTTP(S) links found in the build output.
  * Each unique URL is fetched only once even if it appears on many pages.
+ * Concurrency is controlled by the LINKCHECK_CONCURRENCY env var (default: 20).
  * Exits 1 if any URL is unreachable.
  */
 const runExternalCheck = async () => {
@@ -429,12 +430,21 @@ const runExternalCheck = async () => {
   const failures = new Set();
   let scannedCount = 0;
   const timeoutMs = Number(process.env.LINKCHECK_TIMEOUT ?? 10000);
+  const concurrency = Number(process.env.LINKCHECK_CONCURRENCY ?? 20);
 
-  for (const link of uniqueLinks) {
-    scannedCount += 1;
-    const ok = await checkExternalUrl(link, timeoutMs);
-    if (!ok) failures.add(link);
-  }
+  // Process URLs with a bounded promise pool to avoid opening thousands of
+  // connections at once while still being much faster than serial execution.
+  const queue = Array.from(uniqueLinks);
+  let idx = 0;
+  const worker = async () => {
+    while (idx < queue.length) {
+      const link = queue[idx++];
+      scannedCount += 1;
+      const ok = await checkExternalUrl(link, timeoutMs);
+      if (!ok) failures.add(link);
+    }
+  };
+  await Promise.all(Array.from({ length: concurrency }, worker));
 
   if (failures.size > 0) {
     for (const [source, links] of linksBySource) {
