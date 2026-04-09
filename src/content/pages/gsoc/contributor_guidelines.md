@@ -44,7 +44,7 @@ Some general pointers to follow are:
 - **Set yourself up as a developer.**
   Create an account on [GitHub](http://github.com) or the code hosting platform the organization is using.
   Don't know how to use [git](http://www.git-scm.com/)?
-  Don't worry, there are lots of git [tutorials](http://try.github.com) [online](http://gitimmersion.com/) that will help you to get quite confident with it in a short time.
+  Don't worry, there are lots of git [tutorials](https://docs.github.com/en/get-started/getting-started-with-git/set-up-git) [online](http://gitimmersion.com/) that will help you to get quite confident with it in a short time.
   Also both the [Astropy](http://docs.astropy.org/en/stable/index.html#developer-documentation)
   and [yt](http://yt-project.org/docs/dev/developing/developing.html) developer guides are great reads no matter what project you are thinking of working on.
 
@@ -100,8 +100,8 @@ We expect you to:
 [Python Software Foundation]: http://python-gsoc.org/
 [GSoC Contributor Guide]: https://google.github.io/gsocguides/student/
 [Astropy GSoC guidelines]: https://github.com/astropy/astropy/wiki/GSoC-Guidelines
-[latest pictures of the million degree Sun]: http://docs.sunpy.org/en/stable/generated/gallery/plotting/aia_example.html
+[latest pictures of the million degree Sun]: https://docs.sunpy.org/en/stable/generated/gallery/map/composite_map_AIA_HMI.html
 [volume render a simulation of the galaxy]: http://yt-project.org/docs/dev/quickstart/volume_rendering.html
-[plan some astronomical observations]: https://learn.astropy.org/tutorials/1-Coordinates-Intro.html
+[plan some astronomical observations]: https://learn.astropy.org
 [gsoc-proposal-template]: https://github.com/OpenAstronomy/gsoc-proposals/blob/main/template.md
 [ai-slop-summary]: https://redmonk.com/kholterhoff/2026/02/03/ai-slopageddon-and-the-oss-maintainers/
