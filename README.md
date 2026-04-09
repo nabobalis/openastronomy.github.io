@@ -60,6 +60,12 @@ Run ESLint
 npm run lint
 ```
 
+Auto-fix ESLint issues (where supported)
+
+```shell
+npm run lint:fix
+```
+
 Auto-fix Markdown formatting issues (where supported)
 
 ```shell
@@ -74,14 +80,14 @@ npm run astro:check
 
 ### CI
 
-- GitHub Actions (`.github/workflows/ci.yml`) runs linting, markdown lint, Astro checks, and link checks.
+- GitHub Actions (`.github/workflows/ci.yml`) runs formatting, linting, Markdown lint, type checks, unit tests, build, and link checks as parallel jobs.
 - CircleCI (`.circleci/config.yml`) is kept for website build artifacts (`html/`) preview.
 
 ### Link checks
 
 We can check both internal links + anchors and external links using a script.
 
-However, this first requies the website to be built
+However, this first requires the website to be built
 
 ```shell
 npm run build
@@ -101,10 +107,11 @@ npm run linkcheck:external
 
 If there are sites you need to skip, you can add regex patterns (one per line) in `linkcheck.skip.txt`
 
-There are also two environmental variables:
+There are also three environment variables:
 
 - `LINKCHECK_ROOT=...` to point at a different build folder
 - `LINKCHECK_TIMEOUT=...` in ms for external checks
+- `LINKCHECK_CONCURRENCY=...` number of parallel workers for external checks (default: 20)
 
 ### Structure
 
