@@ -1,19 +1,16 @@
 version: 2.1
 jobs:
-  build:
+  build_website:
     docker:
       - image: cimg/node:lts
-    working_directory: ~/repo
     steps:
       - checkout
       - run:
           name: Install dependencies
           command: npm ci
-
       - run:
           name: Build site
           command: npm run build
-
       - run:
           name: Patch asset paths for artifact viewer
           # Astro emits processed assets at absolute /_astro/ paths. In CircleCI's
@@ -22,16 +19,15 @@ jobs:
           # already resolve correctly and need no changes.
           command: |
             node scripts/circleci-preview.mjs \
-              "/output/job/${CIRCLE_WORKFLOW_JOB_ID}/artifacts/0/html"
+              "/output/job/${CIRCLE_WORKFLOW_JOB_ID}/artifacts/${CIRCLE_NODE_INDEX}/html"
       - store_artifacts:
           path: html
           destination: html
-
       - run:
           name: "Preview URL"
           command: echo "https://output.circle-artifacts.com/output/job/${CIRCLE_WORKFLOW_JOB_ID}/artifacts/${CIRCLE_NODE_INDEX}/html/index.html"
 
 workflows:
-  build_website:
+  preview_website:
     jobs:
-      - build
+      - build_website
