@@ -98,22 +98,30 @@ Add a brief inline comment when test setup is non-obvious (e.g. a mock helper or
 
 - Keep frontmatter focused on **data fetching and transformation**. Move reusable logic into `src/lib/`.
 - All internal links must use `fromSiteRoot(Astro.url.pathname, "/target/")` from `src/lib/relative-paths.js`. Hardcoded absolute paths (`/foo/`) break on preview deployments.
-- Format with Prettier and lint with ESLint before committing (`npm run format && npm run lint:fix`). CI will reject uncommitted formatting changes.
+- Format with Prettier and lint with ESLint before committing. Run locally before pushing:
+
+  ```sh
+  npm run format
+  npm run lint:fix
+  npm run lint:md:fix
+  ```
 
 ---
 
 ## CI
 
-GitHub Actions (`.github/workflows/ci.yml`) runs on every push and pull request:
+GitHub Actions (`.github/workflows/ci.yml`) runs on every push and pull request. Jobs run in parallel where possible:
 
-1. Prettier format check
-2. ESLint
-3. Markdownlint
-4. Astro type/content checks (`astro:check`)
-5. **Unit tests** (`npm test`)
-6. Link checks (internal and external, after a production build)
+| Job | What it checks |
+|---|---|
+| `format` | Prettier format |
+| `lint` | ESLint (warnings treated as errors) + Markdownlint |
+| `typecheck` | Astro type/content checks (`astro:check`) |
+| `test` | Unit tests (`npm test`) |
+| `build` | Production build; output uploaded as a shared artifact |
+| `linkcheck` (×2) | Internal and external links, using the shared build artifact |
 
-All steps must pass before merging.
+All jobs must pass before merging. The `linkcheck` jobs wait for `build` and all quality jobs.
 
 ---
 
