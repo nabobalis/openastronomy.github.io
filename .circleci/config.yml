@@ -8,10 +8,24 @@ jobs:
       - checkout
       - run:
           name: Install dependencies
-          command: npm install
+          command: npm ci
+
       - run:
-          name: Astro build
+          name: Build site
           command: npm run build
+
+      - run:
+          name: Internal link check
+          command: npm run linkcheck:internal
+
+      - run:
+          name: Rebuild site for CircleCI preview
+          # Prefix all asset and page URLs with the artifact path so images,
+          # CSS and links resolve correctly in CircleCI's artifact viewer.
+          command: |
+            ASTRO_BASE="/output/job/${CIRCLE_WORKFLOW_JOB_ID}/artifacts/0/html" \
+              npm run build
+
       - store_artifacts:
           path: ~/repo/html
           destination: html
