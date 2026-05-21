@@ -14,7 +14,7 @@
  */
 import site from "../data/site.json";
 import { fromSiteRoot } from "../lib/relative-paths.js";
-import logoWhite from "../assets/logoOA_white.png";
+import faviconAsset from "../assets/favicon.png";
 import backgroundAp from "../assets/background/background_ap.jpg";
 import backgroundSp from "../assets/background/background_sp.jpg";
 
@@ -36,7 +36,7 @@ const title = pageTitle ?? site.title;
 const pagePath = Astro.url.pathname;
 const canonicalBase = Astro.site ?? site.url;
 const canonicalUrl = new URL(Astro.url.pathname, canonicalBase).toString();
-const faviconHref = fromSiteRoot(pagePath, logoWhite.src);
+const faviconHref = fromSiteRoot(pagePath, faviconAsset.src);
 const ogImageUrl = new URL(
   "/og/openastronomy-og.jpg",
   canonicalBase,
@@ -44,14 +44,10 @@ const ogImageUrl = new URL(
 const ogImageWidth = 1200;
 const ogImageHeight = 630;
 
-// Pick one background per build using a deterministic hash of the page path
-// so the choice is stable, bake into inline <style>, no FOUC.
+// Pick one background per page (stable per URL length, no FOUC).
 const backgroundOptions = [backgroundAp, backgroundSp];
-const pathHash = Array.from(pagePath).reduce(
-  (acc, ch) => (acc * 31 + ch.charCodeAt(0)) >>> 0,
-  0,
-);
-const backgroundAsset = backgroundOptions[pathHash % backgroundOptions.length];
+const backgroundAsset =
+  backgroundOptions[pagePath.length % backgroundOptions.length];
 const backgroundHref = fromSiteRoot(pagePath, backgroundAsset.src);
 
 const publishedIso =
@@ -104,7 +100,5 @@ const publishedIso =
     crossorigin="anonymous"
   />
 
-  <style
-    set:html={`body{background-image:url(${JSON.stringify(backgroundHref).slice(1, -1)})}`}
-  ></style>
+  <style set:html={`body{background-image:url(${backgroundHref})}`}></style>
 </head>

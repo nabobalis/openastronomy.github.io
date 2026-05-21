@@ -1,425 +1,239 @@
-import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
-import path from "node:path";
-
 /**
- * Link checker for the OpenAstronomy static site build.
+ * Link checker for the OpenAstronomy static-site build output.
  *
- * Usage (after running `npm run build`):
  *   node scripts/linkcheck.mjs internal   # check internal links + anchors
  *   node scripts/linkcheck.mjs external   # check external HTTP(S) URLs
  *
- * Environment variables:
- *   LINKCHECK_ROOT        Path to the build output directory (default: "html")
- *   LINKCHECK_SKIP_FILE   Path to the skip-patterns file (default: "linkcheck.skip.txt")
- *   LINKCHECK_TIMEOUT     Timeout in ms for external requests (default: 10000)
+ * Env:
+ *   LINKCHECK_ROOT           build dir (default: "html")
+ *   LINKCHECK_SKIP_FILE      skip patterns file (default: "linkcheck.skip.txt")
+ *   LINKCHECK_TIMEOUT        external request timeout ms (default: 10000)
+ *   LINKCHECK_CONCURRENCY    external workers (default: 20)
  */
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import path from "node:path";
 
 const mode = process.argv[2] ?? "internal";
+const rootPath = path.resolve(process.env.LINKCHECK_ROOT ?? "html");
+const rootLabel = (process.env.LINKCHECK_ROOT ?? "html").replace(/\\/g, "/");
 const skipFile = process.env.LINKCHECK_SKIP_FILE ?? "linkcheck.skip.txt";
-const root = process.env.LINKCHECK_ROOT ?? "html";
 
-if (!existsSync(root)) {
-  console.error(
-    `Build output "${root}" not found. Run "npm run build" first or set LINKCHECK_ROOT.`,
-  );
+if (!existsSync(rootPath)) {
+  console.error(`Build output "${rootLabel}" missing. Run "npm run build".`);
   process.exit(1);
 }
 
-const skipLines = existsSync(skipFile)
-  ? readFileSync(skipFile, "utf8")
-      .split(/\r?\n/)
-      .map((line) => line.trim())
-      .filter((line) => line && !line.startsWith("#"))
-  : [];
-
-const skipPatterns = skipLines
-  .map((line) => {
-    try {
-      return new RegExp(line);
-    } catch {
-      console.warn(`Invalid skip pattern ignored: ${line}`);
-      return null;
-    }
-  })
-  .filter(Boolean);
-
-const rootPath = path.resolve(root);
-const rootLabel = root.replace(/\\/g, "/");
-const startTime = Date.now();
-
-/**
- * Recursively collects all `.html` files under `dir`.
- *
- * @param {string} dir - Directory to search.
- * @param {string[]} [collected=[]] - Accumulator for file paths (used in recursion).
- * @returns {string[]} Absolute paths to all HTML files found.
- */
-const collectHtmlFiles = (dir, collected = []) => {
-  const entries = readdirSync(dir, { withFileTypes: true });
-  for (const entry of entries) {
-    const fullPath = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      collectHtmlFiles(fullPath, collected);
-    } else if (entry.isFile() && entry.name.toLowerCase().endsWith(".html")) {
-      collected.push(fullPath);
-    }
+const skipPatterns = (
+  existsSync(skipFile)
+    ? readFileSync(skipFile, "utf8")
+        .split(/\r?\n/)
+        .map((l) => l.trim())
+        .filter((l) => l && !l.startsWith("#"))
+    : []
+).flatMap((line) => {
+  try {
+    return [new RegExp(line)];
+  } catch {
+    console.warn(`Invalid skip pattern ignored: ${line}`);
+    return [];
   }
-  return collected;
+});
+
+const HREF_RE = /\s(?:href|src)=['"]([^'"]+)['"]/gi;
+const SRCSET_RE = /\ssrcset=['"]([^'"]+)['"]/gi;
+const ID_RE = /\s(?:id|name)=['"]([^'"]+)['"]/gi;
+
+/** Walk a dir, return all .html paths. */
+const collectHtmlFiles = (dir, out = []) => {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) collectHtmlFiles(full, out);
+    else if (entry.name.toLowerCase().endsWith(".html")) out.push(full);
+  }
+  return out;
 };
 
-/**
- * Extracts all link targets from an HTML string.
- *
- * Collects values from `href` and `src` attributes, plus individual URLs from
- * `srcset` descriptors (which may contain multiple comma-separated entries with
- * optional width/density suffixes).
- *
- * @param {string} html - Raw HTML content.
- * @returns {string[]} Array of raw link strings (may include duplicates).
- */
-const extractLinks = (html) => {
+const matchAll = (re, html, sink) => {
+  let m;
+  while ((m = re.exec(html)) !== null) if (m[1]) sink(m[1].trim());
+};
+
+const cache = new Map();
+const parseFile = (file) => {
+  if (cache.has(file)) return cache.get(file);
+  const html = readFileSync(file, "utf8");
   const links = [];
-  // Match href="..." and src="..." attributes
-  const attrRegex = /\s(?:href|src)=['"]([^'"]+)['"]/gi;
-  let match;
-  while ((match = attrRegex.exec(html)) !== null) {
-    if (match[1]) {
-      links.push(match[1].trim());
-    }
-  }
-  // srcset values are comma-separated: `url1 1x, url2 2x` — extract the URL part only
-  const srcsetRegex = /\ssrcset=['"]([^'"]+)['"]/gi;
-  while ((match = srcsetRegex.exec(html)) !== null) {
-    const raw = match[1] ?? "";
-    raw.split(",").forEach((part) => {
-      const url = part.trim().split(/\s+/)[0];
-      if (url) {
-        links.push(url);
-      }
-    });
-  }
-  return links;
-};
-
-/**
- * Extracts all anchor IDs from an HTML string.
- *
- * Collects both `id="..."` and `name="..."` attribute values, since both can
- * serve as jump targets for fragment links (`#anchor`).
- *
- * @param {string} html - Raw HTML content.
- * @returns {Set<string>} Set of anchor identifier strings.
- */
-const extractAnchors = (html) => {
   const anchors = new Set();
-  const idRegex = /\sid=['"]([^'"]+)['"]/gi;
-  const nameRegex = /\sname=['"]([^'"]+)['"]/gi;
-  let match;
-  while ((match = idRegex.exec(html)) !== null) {
-    if (match[1]) {
-      anchors.add(match[1].trim());
+  matchAll(HREF_RE, html, (v) => links.push(v));
+  matchAll(SRCSET_RE, html, (raw) => {
+    for (const part of raw.split(",")) {
+      const url = part.trim().split(/\s+/)[0];
+      if (url) links.push(url);
     }
-  }
-  while ((match = nameRegex.exec(html)) !== null) {
-    if (match[1]) {
-      anchors.add(match[1].trim());
-    }
-  }
-  return anchors;
-};
-
-/** Cache of parsed link/anchor data keyed by absolute file path. */
-const fileCache = new Map();
-
-/**
- * Returns parsed link and anchor data for an HTML file, using a cache to avoid
- * re-reading files that are referenced by many source pages.
- *
- * @param {string} filePath - Absolute path to an HTML file.
- * @returns {{ links: string[], anchors: Set<string> }}
- */
-const getFileData = (filePath) => {
-  if (fileCache.has(filePath)) {
-    return fileCache.get(filePath);
-  }
-  const html = readFileSync(filePath, "utf8");
-  const data = {
-    links: extractLinks(html),
-    anchors: extractAnchors(html),
-  };
-  fileCache.set(filePath, data);
+  });
+  matchAll(ID_RE, html, (v) => anchors.add(v));
+  const data = { links, anchors };
+  cache.set(file, data);
   return data;
 };
 
-/**
- * Returns true if a link should be ignored by the current check mode.
- *
- * In `internal` mode: skips external HTTP(S) URLs and non-web schemes.
- * In `external` mode: skips everything that isn't HTTP(S).
- * Always skips empty values, bare `#`, `javascript:`, and `data:` URIs.
- *
- * @param {string} link - Raw link value from an HTML attribute.
- * @returns {boolean}
- */
-const isSkippableLink = (link) => {
+const isSkippable = (link) => {
   if (!link || link === "#") return true;
-  const trimmed = link.trim();
-  if (!trimmed) return true;
-  const lower = trimmed.toLowerCase();
+  const lower = link.toLowerCase();
   if (lower.startsWith("javascript:") || lower.startsWith("data:")) return true;
   if (mode === "internal") {
-    if (/^(mailto:|tel:|irc:|ftp:)/i.test(trimmed)) return true;
-    if (/^https?:\/\//i.test(trimmed)) return true;
-  } else {
-    if (!/^https?:\/\//i.test(trimmed)) return true;
+    if (/^(mailto:|tel:|irc:|ftp:|https?:\/\/)/i.test(link)) return true;
+  } else if (!/^https?:\/\//i.test(link)) {
+    return true;
   }
-  return skipPatterns.some((pattern) => pattern.test(trimmed));
+  return skipPatterns.some((p) => p.test(link));
 };
 
-/**
- * Resolves an internal link to an absolute file path and optional anchor.
- *
- * Handles absolute paths (`/members/`), relative paths (`../foo/`), and
- * fragment-only links (`#section`). Applies the same directory-index resolution
- * that a web server would: `/foo/` → `/foo/index.html`.
- *
- * Returns `null` for protocol-relative URLs (`//example.com/`) which cannot be
- * resolved as local files.
- *
- * @param {string} link - Raw link value from an HTML attribute.
- * @param {string} currentFile - Absolute path to the HTML file containing the link.
- * @returns {{ filePath: string, anchor: string, urlPath?: string } | null}
- */
-const resolveInternalTarget = (link, currentFile) => {
-  const trimmed = link.trim();
-  const [pathPartRaw, hashPartRaw] = trimmed.split("#");
-  const pathPart = (pathPartRaw ?? "").split("?")[0];
-  const hashPart = hashPartRaw ?? "";
-
+/** Map a link from `current` (abs HTML path) to `{ file, anchor, urlPath }`. */
+const resolveInternal = (link, current) => {
+  const [pathPartRaw, hashPart = ""] = link.split("#");
+  const pathPart = pathPartRaw.split("?")[0];
   let anchor = "";
-  if (hashPart) {
-    try {
-      anchor = decodeURIComponent(hashPart);
-    } catch {
-      anchor = hashPart;
-    }
+  try {
+    anchor = decodeURIComponent(hashPart);
+  } catch {
+    anchor = hashPart;
   }
 
-  if (!pathPart) {
-    return { filePath: currentFile, anchor };
-  }
-  if (pathPart.startsWith("//")) {
-    return null;
-  }
+  if (!pathPart) return { file: current, anchor };
+  if (pathPart.startsWith("//")) return null;
 
-  let relPath = "";
+  let rel;
   if (pathPart.startsWith("/")) {
-    relPath = pathPart.slice(1);
+    rel = pathPart.slice(1);
   } else {
     const currentRel = path
-      .relative(rootPath, currentFile)
+      .relative(rootPath, current)
       .split(path.sep)
       .join("/");
-    const currentDir = path.posix.dirname(currentRel);
-    relPath = path.posix.normalize(path.posix.join(currentDir, pathPart));
+    rel = path.posix.normalize(
+      path.posix.join(path.posix.dirname(currentRel), pathPart),
+    );
   }
 
-  if (!relPath) {
-    return {
-      filePath: path.join(rootPath, "index.html"),
-      anchor,
-      urlPath: "/",
-    };
+  if (!rel) {
+    return { file: path.join(rootPath, "index.html"), anchor, urlPath: "/" };
   }
-
-  const directPath = path.join(rootPath, relPath);
+  const direct = path.join(rootPath, rel);
   if (pathPart.endsWith("/")) {
     return {
-      filePath: path.join(directPath, "index.html"),
+      file: path.join(direct, "index.html"),
       anchor,
-      urlPath: `/${relPath}`,
+      urlPath: `/${rel}`,
     };
   }
-
-  if (path.extname(relPath)) {
-    return { filePath: directPath, anchor, urlPath: `/${relPath}` };
+  if (path.extname(rel) || (existsSync(direct) && statSync(direct).isFile())) {
+    return { file: direct, anchor, urlPath: `/${rel}` };
   }
-
-  if (existsSync(directPath) && statSync(directPath).isFile()) {
-    return { filePath: directPath, anchor, urlPath: `/${relPath}` };
-  }
-
   return {
-    filePath: path.join(directPath, "index.html"),
+    file: path.join(direct, "index.html"),
     anchor,
-    urlPath: `/${relPath}/`,
+    urlPath: `/${rel}/`,
   };
 };
 
-/**
- * Formats an absolute file path as a human-readable source label for output.
- * Directory-index files are shown as their directory path (e.g. `html/foo/`).
- *
- * @param {string} filePath - Absolute path to an HTML file.
- * @returns {string}
- */
-const displaySourcePath = (filePath) => {
-  const rel = path.relative(rootPath, filePath).split(path.sep).join("/");
+const showSource = (file) => {
+  const rel = path.relative(rootPath, file).split(path.sep).join("/");
   if (rel === "index.html") return `${rootLabel}/`;
   if (rel.endsWith("/index.html"))
-    return `${rootLabel}/${rel.replace(/index\.html$/, "")}`;
+    return `${rootLabel}/${rel.slice(0, -"index.html".length)}`;
   return `${rootLabel}/${rel}`;
 };
 
-/**
- * Formats a resolved target as a human-readable label for error output.
- *
- * @param {string|undefined} urlPath - URL path string if known.
- * @param {string} filePath - Absolute file path of the resolved target.
- * @param {string} anchor - Fragment identifier (without `#`), or empty string.
- * @returns {string}
- */
-const displayTargetPath = (urlPath, filePath, anchor) => {
-  let displayPath = "";
-  if (urlPath) {
-    const normalized = urlPath.replace(/^\/+/, "");
-    displayPath = normalized ? `${rootLabel}/${normalized}` : `${rootLabel}/`;
-  } else {
-    const rel = path.relative(rootPath, filePath).split(path.sep).join("/");
-    displayPath = `${rootLabel}/${rel}`;
-  }
-  return anchor ? `${displayPath}#${anchor}` : displayPath;
+const showTarget = ({ file, anchor, urlPath }) => {
+  const base = urlPath
+    ? `${rootLabel}${urlPath}`
+    : `${rootLabel}/${path.relative(rootPath, file).split(path.sep).join("/")}`;
+  return anchor ? `${base}#${anchor}` : base;
 };
 
-/**
- * Prints broken-link failures grouped by source page, then exits with code 1.
- *
- * @param {{ source: string, target: string, type: string }[]} failures
- * @param {number} scannedCount - Total number of links that were checked.
- */
-const reportFailures = (failures, scannedCount) => {
+const reportFailures = (failures, scanned, startTime) => {
   const grouped = new Map();
-  for (const failure of failures) {
-    if (!grouped.has(failure.source)) grouped.set(failure.source, []);
-    grouped.get(failure.source).push(failure);
+  for (const f of failures) {
+    if (!grouped.has(f.source)) grouped.set(f.source, []);
+    grouped.get(f.source).push(f);
   }
   for (const [source, items] of grouped) {
     console.error(source);
-    for (const item of items) {
-      const code = item.type === "anchor" ? "ANCHOR" : "404";
-      console.error(`  [${code}] ${item.target}`);
-    }
+    for (const f of items)
+      console.error(
+        `  [${f.kind === "anchor" ? "ANCHOR" : "404"}] ${f.target}`,
+      );
   }
   const elapsed = ((Date.now() - startTime) / 1000).toFixed(3);
   console.error(
-    `ERROR: Detected ${failures.length} broken links. Scanned ${scannedCount} links in ${elapsed} seconds.`,
+    `ERROR: Detected ${failures.length} broken links. Scanned ${scanned} links in ${elapsed} seconds.`,
   );
 };
 
-/**
- * Prints a success summary and exits with code 0.
- *
- * @param {number} scannedCount - Total number of links that were checked.
- */
-const reportSuccess = (scannedCount) => {
+const reportSuccess = (scanned, startTime) => {
   const elapsed = ((Date.now() - startTime) / 1000).toFixed(3);
-  console.log(`OK: Scanned ${scannedCount} links in ${elapsed} seconds.`);
+  console.log(`OK: Scanned ${scanned} links in ${elapsed} seconds.`);
 };
 
-/** Checks all internal links and anchors in the build output. Exits 1 on failure. */
-const runInternalCheck = () => {
-  const htmlFiles = collectHtmlFiles(rootPath);
+const runInternalCheck = (startTime) => {
   const failures = [];
-  let scannedCount = 0;
-
-  for (const filePath of htmlFiles) {
-    const { links } = getFileData(filePath);
-    const source = displaySourcePath(filePath);
-    for (const link of links) {
-      if (isSkippableLink(link)) continue;
-      const target = resolveInternalTarget(link, filePath);
+  let scanned = 0;
+  for (const file of collectHtmlFiles(rootPath)) {
+    const source = showSource(file);
+    for (const link of parseFile(file).links) {
+      if (isSkippable(link)) continue;
+      const target = resolveInternal(link, file);
       if (!target) continue;
-      const { filePath: targetFile, anchor, urlPath } = target;
-      scannedCount += 1;
-      if (!existsSync(targetFile)) {
-        failures.push({
-          source,
-          target: displayTargetPath(urlPath, targetFile, anchor),
-          type: "missing",
-        });
-        continue;
-      }
-      if (anchor && targetFile.toLowerCase().endsWith(".html")) {
-        const { anchors } = getFileData(targetFile);
-        if (!anchors.has(anchor)) {
-          failures.push({
-            source,
-            target: displayTargetPath(urlPath, targetFile, anchor),
-            type: "anchor",
-          });
+      scanned++;
+      if (!existsSync(target.file)) {
+        failures.push({ source, target: showTarget(target), kind: "missing" });
+      } else if (target.anchor && target.file.toLowerCase().endsWith(".html")) {
+        const { anchors } = parseFile(target.file);
+        if (!anchors.has(target.anchor)) {
+          failures.push({ source, target: showTarget(target), kind: "anchor" });
         }
       }
     }
   }
-
-  if (failures.length > 0) {
-    reportFailures(failures, scannedCount);
+  if (failures.length) {
+    reportFailures(failures, scanned, startTime);
     process.exit(1);
   }
-  reportSuccess(scannedCount);
+  reportSuccess(scanned, startTime);
 };
 
-/**
- * Checks whether a single external URL responds with a successful status code.
- *
- * Attempts a HEAD request first (faster, no body transfer). Falls back to GET
- * for servers that return 405 (Method Not Allowed) or 400 for HEAD requests,
- * which is common on some CDNs and custom servers.
- *
- * @param {string} url - Fully-qualified HTTP(S) URL to check.
- * @param {number} timeoutMs - Abort timeout in milliseconds.
- * @returns {Promise<boolean>} True if the URL returned a 2xx/3xx response.
- */
-const checkExternalUrl = async (url, timeoutMs) => {
+const fetchOk = async (url, timeoutMs) => {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    let response = await fetch(url, {
+    let res = await fetch(url, {
       method: "HEAD",
       redirect: "follow",
       signal: controller.signal,
     });
-    if (response.status === 405 || response.status === 400) {
-      response = await fetch(url, {
+    if (res.status === 400 || res.status === 405) {
+      res = await fetch(url, {
         method: "GET",
         redirect: "follow",
         signal: controller.signal,
       });
     }
-    clearTimeout(timeout);
-    return response.status >= 200 && response.status < 400;
+    return res.status >= 200 && res.status < 400;
   } catch {
-    clearTimeout(timeout);
     return false;
+  } finally {
+    clearTimeout(timer);
   }
 };
 
-/**
- * Checks all external HTTP(S) links found in the build output.
- * Each unique URL is fetched only once even if it appears on many pages.
- * Concurrency is controlled by the LINKCHECK_CONCURRENCY env var (default: 20).
- * Exits 1 if any URL is unreachable.
- */
-const runExternalCheck = async () => {
-  const htmlFiles = collectHtmlFiles(rootPath);
+const runExternalCheck = async (startTime) => {
   const linksBySource = new Map();
   const uniqueLinks = new Set();
-
-  for (const filePath of htmlFiles) {
-    const { links } = getFileData(filePath);
-    const source = displaySourcePath(filePath);
-    for (const link of links) {
-      if (isSkippableLink(link)) continue;
+  for (const file of collectHtmlFiles(rootPath)) {
+    const source = showSource(file);
+    for (const link of parseFile(file).links) {
+      if (isSkippable(link)) continue;
       const trimmed = link.trim();
       uniqueLinks.add(trimmed);
       if (!linksBySource.has(source)) linksBySource.set(source, new Set());
@@ -427,47 +241,38 @@ const runExternalCheck = async () => {
     }
   }
 
-  const failures = new Set();
-  let scannedCount = 0;
   const timeoutMs = Number(process.env.LINKCHECK_TIMEOUT ?? 10000);
   const concurrency = Number(process.env.LINKCHECK_CONCURRENCY ?? 20);
-
-  // Process URLs with a bounded promise pool to avoid opening thousands of
-  // connections at once while still being much faster than serial execution.
-  const queue = Array.from(uniqueLinks);
-  let idx = 0;
+  const queue = [...uniqueLinks];
+  const failures = new Set();
+  let i = 0;
+  let scanned = 0;
   const worker = async () => {
-    while (idx < queue.length) {
-      const link = queue[idx++];
-      scannedCount += 1;
-      const ok = await checkExternalUrl(link, timeoutMs);
-      if (!ok) failures.add(link);
+    while (i < queue.length) {
+      const link = queue[i++];
+      scanned++;
+      if (!(await fetchOk(link, timeoutMs))) failures.add(link);
     }
   };
   await Promise.all(Array.from({ length: concurrency }, worker));
 
-  if (failures.size > 0) {
+  if (failures.size) {
     for (const [source, links] of linksBySource) {
-      const broken = Array.from(links).filter((link) => failures.has(link));
-      if (broken.length === 0) continue;
+      const broken = [...links].filter((l) => failures.has(l));
+      if (!broken.length) continue;
       console.error(source);
-      for (const link of broken) {
-        console.error(`  [ERR] ${link}`);
-      }
+      for (const l of broken) console.error(`  [ERR] ${l}`);
     }
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(3);
     console.error(
-      `ERROR: Detected ${failures.size} broken links. Scanned ${scannedCount} links in ${elapsed} seconds.`,
+      `ERROR: Detected ${failures.size} broken links. Scanned ${scanned} links in ${elapsed} seconds.`,
     );
     process.exit(1);
   }
-
-  reportSuccess(scannedCount);
+  reportSuccess(scanned, startTime);
 };
 
+const startTime = Date.now();
 console.log(`Scanning ${mode} links in ${rootLabel}`);
-if (mode === "external") {
-  await runExternalCheck();
-} else {
-  runInternalCheck();
-}
+if (mode === "external") await runExternalCheck(startTime);
+else runInternalCheck(startTime);

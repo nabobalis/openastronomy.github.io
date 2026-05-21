@@ -13,12 +13,10 @@ jobs:
           command: npm run build
       - run:
           name: Patch asset paths for artifact viewer
-          # Astro emits processed assets at absolute /_astro/ paths. In CircleCI's
-          # artifact viewer these must be prefixed with the full artifact URL path.
-          # Navigation links and CSS use relative paths (fromSiteRoot) so they
-          # already resolve correctly and need no changes.
+          # Astro emits processed assets at absolute /_astro/ paths. Prefix
+          # them so the CircleCI artifact viewer can resolve them.
           command: |
-            node scripts/circleci-preview.mjs \
+            sh scripts/circleci-preview.sh \
               "/output/job/${CIRCLE_WORKFLOW_JOB_ID}/artifacts/${CIRCLE_NODE_INDEX}/html"
       - store_artifacts:
           path: html

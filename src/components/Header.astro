@@ -2,11 +2,9 @@
 /*
  * Header - site-wide navigation bar.
  *
- * Merges page_links (internal, localised with localizeHref) and nav_links
- * (external, used as-is) from site.json into a single nav list.
- *
- * Includes an inline <script> that handles the mobile hamburger toggle and
- * closes the menu when a link is clicked or the user clicks outside.
+ * Merges page_links (internal, localised) and nav_links (external) from
+ * site.json into one nav list. Mobile menu uses a small inline script to
+ * toggle the .is-open class.
  */
 import { Image } from "astro:assets";
 import site from "../data/site.json";
@@ -24,8 +22,8 @@ const navLinks = [
 ];
 ---
 
-<header class="site-header" style="background-color: #292929;">
-  <div class="wrapper">
+<header class="site-header">
+  <div class="container">
     <a class="site-title" href={fromSiteRoot(pagePath, "/")}>
       <Image
         class="logo"
@@ -46,20 +44,15 @@ const navLinks = [
         aria-controls="site-nav-links"
       >
         <svg
-          viewBox="0 0 18 15"
+          viewBox={icons.hamburger.viewBox}
           width="18"
           height="15"
           aria-hidden="true"
           focusable="false"
         >
-          {
-            icons.hamburger_paths.map((pathData) => (
-              <path fill="#ffffff" d={pathData} />
-            ))
-          }
+          {icons.hamburger.paths.map((d) => <path fill="#ffffff" d={d} />)}
         </svg>
       </button>
-
       <div class="trigger" id="site-nav-links">
         {
           navLinks.map((link) => (
@@ -74,32 +67,22 @@ const navLinks = [
 </header>
 
 <script>
-  const nav = document.querySelector("[data-site-nav]");
-  const toggle = nav?.querySelector(".menu-icon");
-  const links = nav?.querySelector(".trigger");
-  if (nav && toggle && links) {
-    const closeMenu = () => {
+  const nav = document.querySelector<HTMLElement>("[data-site-nav]");
+  const toggle = nav?.querySelector<HTMLButtonElement>(".menu-icon");
+  if (nav && toggle) {
+    const close = () => {
       nav.classList.remove("is-open");
       toggle.setAttribute("aria-expanded", "false");
     };
-
-    toggle.addEventListener("click", (event) => {
-      event.preventDefault();
-      const isOpen = nav.classList.toggle("is-open");
-      toggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    toggle.addEventListener("click", () => {
+      const open = nav.classList.toggle("is-open");
+      toggle.setAttribute("aria-expanded", open ? "true" : "false");
     });
-
-    links.addEventListener("click", (event) => {
-      const target = event.target;
-      if (target instanceof Element && target.closest("a")) {
-        closeMenu();
-      }
-    });
-
     document.addEventListener("click", (event) => {
-      if (event.target instanceof Node && !nav.contains(event.target)) {
-        closeMenu();
-      }
+      if (event.target instanceof Node && !nav.contains(event.target)) close();
+    });
+    nav.addEventListener("click", (event) => {
+      if (event.target instanceof Element && event.target.closest("a")) close();
     });
   }
 </script>

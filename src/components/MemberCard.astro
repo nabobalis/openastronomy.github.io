@@ -1,86 +1,50 @@
 ---
 /*
- * MemberCard - renders a card for a single OpenAstronomy member organisation.
- *
- * Displays the member's logo, name, a link to their website, and lists of
- * repository and social links built by src/lib/members.ts.
- *
- * Props:
- *   memberKey - JSON key (used to resolve repository provider icons and links)
- *   details   - MemberDetails object from members.json
- *   eager     - when true, logo is loaded eagerly (default false)
+ * MemberCard - renders one OpenAstronomy member organisation.
  *
  * Note: `details.description` is rendered with `set:html` because it may
- * contain inline links and emphasis. The source (`src/data/members.json`) is
- * trusted, repository-controlled content — do NOT pass untrusted input here.
+ * contain inline links/emphasis. Source (`src/data/members.json`) is trusted
+ * repository-controlled content — do NOT pass untrusted input here.
  */
 import { Image } from "astro:assets";
 import type { ImageMetadata } from "astro";
-import icons from "../data/icons.json";
-import { buildRepositoryLinks, buildSocialLinks } from "../lib/members.ts";
-import { slugify } from "../lib/slug.ts";
+import Icon from "./Icon.astro";
+import { buildMemberLinks, type MemberDetails } from "../lib/members.ts";
+import { slugify } from "../lib/relative-paths.js";
 
-type MemberDetails = {
-  name: string;
-  url: string;
-  logo: string;
-  description?: string;
-  repositories?: Record<string, string>;
-  mailinglist?: Record<string, string>;
-  chat?: Record<string, string>;
-  microblogging?: Record<string, string>;
-};
+type Props = { memberKey: string; details: MemberDetails; eager?: boolean };
+const { memberKey, details, eager = false } = Astro.props as Props;
 
-const {
-  memberKey,
-  details,
-  eager = false,
-} = Astro.props as {
-  memberKey: string;
-  details: MemberDetails;
-  eager?: boolean;
-};
-
-const mailingLists = details.mailinglist
-  ? Object.entries(details.mailinglist)
-  : [];
-const chats = details.chat ? Object.entries(details.chat) : [];
-const repositoryLinks = buildRepositoryLinks(details.repositories, memberKey);
-const socialLinks = buildSocialLinks(details.microblogging);
+const links = buildMemberLinks(details);
 const anchorId = slugify(details.name);
 
-const memberLogoModules = import.meta.glob<{ default: ImageMetadata }>(
+const logoModules = import.meta.glob<{ default: ImageMetadata }>(
   "../assets/members/*.{png,jpg,jpeg,webp,avif}",
   { eager: true },
 );
-const memberLogos = Object.fromEntries(
-  Object.entries(memberLogoModules).map(([path, mod]) => {
-    const filename = path.split("/").pop() ?? "";
-    return [filename, mod.default];
-  }),
+const logoMap = Object.fromEntries(
+  Object.entries(logoModules).map(([p, m]) => [p.split("/").pop(), m.default]),
 ) as Record<string, ImageMetadata>;
-const logoAsset = memberLogos[details.logo];
-if (!logoAsset) {
-  throw new Error(`Missing member logo asset: ${details.logo}`);
-}
+const logo = logoMap[details.logo];
+if (!logo) throw new Error(`Missing member logo asset: ${details.logo}`);
 ---
 
-<div class="d-flex align-items-start gap-3">
+<div class="member-card">
   <a
     href={details.url}
-    class="flex-shrink-0"
-    rel="noopener noreferrer"
+    class="member-logo-link"
     target="_blank"
+    rel="noopener noreferrer"
   >
     <Image
       class="member-logo"
-      src={logoAsset}
+      src={logo}
       alt={memberKey}
       loading={eager ? "eager" : "lazy"}
       fetchpriority={eager ? "high" : "auto"}
     />
   </a>
-  <div id={anchorId} class="flex-grow-1">
+  <div id={anchorId} class="member-body">
     <a
       href={details.url}
       class="project"
@@ -88,68 +52,21 @@ if (!logoAsset) {
       rel="noopener noreferrer">{details.name}</a
     >
     <span set:html={details.description ?? ""} />
-    <br />
-    {
-      repositoryLinks.map((repository) => (
-        <a href={repository.href} target="_blank" rel="noopener noreferrer">
-          <span class="icon icon--github">
-            <svg height={repository.height} viewBox={repository.viewBox}>
-              <path fill="#333333" d={repository.icon} />
-            </svg>
-          </span>
-          {repository.label}
-        </a>
-      ))
-    }
-    <br />
-    {
-      mailingLists.length > 0 ? (
-        <>
-          <span class="icon icon-envelope" />
-          {mailingLists.map(([label, url], index) => (
-            <>
-              <a href={url} rel="noopener noreferrer">
-                {label}
-              </a>
-              {index < mailingLists.length - 1 ? "," : ""}
-            </>
-          ))}
-          <br />
-        </>
-      ) : null
-    }
-    {
-      chats.length > 0 ? (
-        <>
-          <span class="icon icon--github">
-            <svg viewBox="0 0 40 40" height="50%">
-              <path fill="#333333" d={icons.irc_logo} />
-            </svg>
-          </span>
-          {chats.map(([label, url], index) => (
-            <>
-              <a href={url} rel="noopener noreferrer">
-                {label}
-              </a>
-              {index < chats.length - 1 ? "," : ""}
-            </>
-          ))}
-          <br />
-        </>
-      ) : null
-    }
-    {
-      socialLinks.map((socialLink) => (
-        <a href={socialLink.href} target="_blank" rel="noopener noreferrer">
-          <span class="icon icon--github">
-            <svg height="50%" viewBox="0 0 16 16">
-              <path fill="#333333" d={socialLink.icon} />
-            </svg>
-          </span>
-          {socialLink.label}
-        </a>
-      ))
-    }
-    <br />
+    <ul class="member-links">
+      {
+        links.map((link) => (
+          <li>
+            <a href={link.href} target="_blank" rel="noopener noreferrer">
+              {link.iconName === "envelope" ? (
+                <span class="icon-envelope" aria-hidden="true" />
+              ) : (
+                <Icon name={link.iconName} fill="#333333" />
+              )}
+              {link.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
   </div>
 </div>

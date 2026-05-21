@@ -1,19 +1,28 @@
 ---
 /**
- * Summary card for a single GSoC project idea, shown in the season grid.
- * Clicking the card opens the detail modal via the data-project-detail attribute.
+ * Summary card for one GSoC project. Click opens the matching <dialog>.
  */
 import type { GsocProject } from "../../lib/gsoc.ts";
 
 const { project } = Astro.props as { project: GsocProject };
-const detailId = `detail-${project.anchor}`;
+
+const rows = [
+  { label: "Mentors", values: project.mentors },
+  { label: "Initiatives", values: project.initiatives },
+  { label: "Project size", values: project.projectSize },
+  { label: "Tags", values: project.tags },
+].filter((r) => r.values.length > 0);
 ---
 
-<button class="gsoc-project-card" type="button" data-project-detail={detailId}>
+<button
+  class="gsoc-project-card"
+  type="button"
+  data-detail={`detail-${project.anchor}`}
+>
   <h3>{project.name}</h3>
   {project.desc ? <p class="gsoc-project-desc">{project.desc}</p> : null}
   {
-    project.cardRows.map((row) => (
+    rows.map((row) => (
       <div class="gsoc-card-row">
         <span class="gsoc-card-label">{row.label}:</span>
         <span>{row.values.join(", ")}</span>

@@ -14,6 +14,16 @@ const posts = defineCollection({
     .passthrough(),
 });
 
-export const collections = {
-  posts,
-};
+const pages = defineCollection({
+  loader: glob({ pattern: "**/*.md", base: "./src/content/pages" }),
+  schema: z
+    .object({
+      title: z.string().optional(),
+      name: z.string().optional(),
+      description: z.string().optional(),
+      season: z.union([z.string(), z.number()]).optional(),
+    })
+    .passthrough(),
+});
+
+export const collections = { posts, pages };

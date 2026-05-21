@@ -1,102 +1,118 @@
 import { describe, it, expect } from "vitest";
-import { buildRepositoryLinks, buildSocialLinks } from "../members.ts";
+import { buildMemberLinks } from "../members.ts";
 
-// ---------------------------------------------------------------------------
-// buildRepositoryLinks
-// ---------------------------------------------------------------------------
+const base = { name: "Demo", url: "https://demo.org", logo: "demo.png" };
 
-describe("buildRepositoryLinks", () => {
-  it("returns an empty array when repositories is undefined", () => {
-    expect(buildRepositoryLinks(undefined, "myorg")).toEqual([]);
+describe("buildMemberLinks", () => {
+  it("returns an empty array when no link fields are set", () => {
+    expect(buildMemberLinks(base)).toEqual([]);
   });
 
-  it("returns an empty array for an empty object", () => {
-    expect(buildRepositoryLinks({}, "myorg")).toEqual([]);
+  it("builds a github repository link", () => {
+    const [link] = buildMemberLinks({
+      ...base,
+      repositories: { github: "astropy/astropy" },
+    });
+    expect(link).toEqual({
+      href: "https://github.com/astropy/astropy",
+      label: "astropy/astropy",
+      iconName: "github",
+    });
   });
 
-  it("builds a github link from a known provider", () => {
-    const [link] = buildRepositoryLinks(
-      { github: "astropy/astropy" },
-      "astropy",
-    );
-    expect(link.href).toBe("https://github.com/astropy/astropy");
-    expect(link.label).toBe("astropy/astropy");
+  it("builds a bitbucket repository link", () => {
+    const [link] = buildMemberLinks({
+      ...base,
+      repositories: { bitbucket: "team/repo" },
+    });
+    expect(link.href).toBe("https://bitbucket.com/team/repo");
+    expect(link.iconName).toBe("bitbucket");
   });
 
-  it("builds a bitbucket link from a known provider", () => {
-    const [link] = buildRepositoryLinks(
-      { bitbucket: "myteam/myrepo" },
-      "myorg",
-    );
-    expect(link.href).toBe("https://bitbucket.com/myteam/myrepo");
-    expect(link.label).toBe("myteam/myrepo");
-  });
-
-  it("builds a sourceforge link from a known provider", () => {
-    const [link] = buildRepositoryLinks({ sourceforge: "my-project" }, "myorg");
+  it("builds a sourceforge repository link", () => {
+    const [link] = buildMemberLinks({
+      ...base,
+      repositories: { sourceforge: "my-project" },
+    });
     expect(link.href).toBe("https://sourceforge.net/projects/my-project");
-    expect(link.label).toBe("my-project");
+    expect(link.iconName).toBe("sourceforge");
   });
 
-  it("uses the raw value as href and memberKey as label for unknown providers", () => {
-    const [link] = buildRepositoryLinks(
-      { gitlab: "https://gitlab.com/org/repo" },
-      "org",
-    );
+  it("falls back to raw URL + member name + github icon for unknown providers", () => {
+    const [link] = buildMemberLinks({
+      ...base,
+      name: "Demo",
+      repositories: { gitlab: "https://gitlab.com/org/repo" },
+    });
     expect(link.href).toBe("https://gitlab.com/org/repo");
-    expect(link.label).toBe("org");
+    expect(link.label).toBe("Demo");
+    expect(link.iconName).toBe("github");
   });
 
-  it("handles multiple providers", () => {
-    const links = buildRepositoryLinks(
-      { github: "org/repo", bitbucket: "org/repo2" },
-      "org",
-    );
-    expect(links).toHaveLength(2);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// buildSocialLinks
-// ---------------------------------------------------------------------------
-
-describe("buildSocialLinks", () => {
-  it("returns an empty array when microblogging is undefined", () => {
-    expect(buildSocialLinks(undefined)).toEqual([]);
+  it("builds mailing list links with envelope icon", () => {
+    const [link] = buildMemberLinks({
+      ...base,
+      mailinglists: { users: "https://example.com/list" },
+    });
+    expect(link).toEqual({
+      href: "https://example.com/list",
+      label: "users",
+      iconName: "envelope",
+    });
   });
 
-  it("returns an empty array for an empty object", () => {
-    expect(buildSocialLinks({})).toEqual([]);
+  it("builds chat links with irc icon", () => {
+    const [link] = buildMemberLinks({
+      ...base,
+      chats: { slack: "https://example.com/slack" },
+    });
+    expect(link.iconName).toBe("irc");
   });
 
-  it("builds an X (Twitter) link", () => {
-    const [link] = buildSocialLinks({ x: "astropy" });
-    expect(link.href).toBe("https://x.com/astropy");
-    expect(link.label).toBe("@astropy");
+  it("builds an X (Twitter) social link", () => {
+    const [link] = buildMemberLinks({
+      ...base,
+      socials: { x: "astropy" },
+    });
+    expect(link).toEqual({
+      href: "https://x.com/astropy",
+      label: "@astropy",
+      iconName: "x",
+    });
   });
 
-  it("builds a Mastodon link from a valid @user@instance handle", () => {
-    const [link] = buildSocialLinks({
-      mastodon: "@astropy@mastodon.social",
+  it("builds a mastodon link from @user@host", () => {
+    const [link] = buildMemberLinks({
+      ...base,
+      socials: { mastodon: "@astropy@mastodon.social" },
     });
     expect(link.href).toBe("https://mastodon.social/@astropy");
-    expect(link.label).toBe("@astropy@mastodon.social");
+    expect(link.iconName).toBe("mastodon");
   });
 
-  it("skips Mastodon entries with malformed handles", () => {
-    // A handle without the @instance part cannot be resolved
-    expect(buildSocialLinks({ mastodon: "astropy" })).toEqual([]);
+  it("skips malformed mastodon handles", () => {
+    expect(
+      buildMemberLinks({ ...base, socials: { mastodon: "astropy" } }),
+    ).toEqual([]);
   });
 
-  it("silently ignores unsupported platforms", () => {
-    expect(buildSocialLinks({ bluesky: "astropy.bsky.social" })).toEqual([]);
+  it("ignores unsupported social platforms", () => {
+    expect(
+      buildMemberLinks({
+        ...base,
+        socials: { bluesky: "astropy.bsky.social" },
+      }),
+    ).toEqual([]);
   });
 
-  it("handles multiple platforms", () => {
-    const links = buildSocialLinks({
-      x: "astropy",
-      mastodon: "@astropy@mastodon.social",
+  it("merges all link types into a single list", () => {
+    const links = buildMemberLinks({
+      ...base,
+      repositories: { github: "org/repo" },
+      mailinglists: { devs: "https://example.com" },
+      chats: { slack: "https://example.com/slack" },
+      socials: { x: "demo" },
     });
-    expect(links).toHaveLength(2);
+    expect(links).toHaveLength(4);
   });
 });

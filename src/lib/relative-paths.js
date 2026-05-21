@@ -63,3 +63,16 @@ export const localizeHref = (pathname, href) => {
   if (value.startsWith("/")) return fromSiteRoot(pathname, value);
   return value;
 };
+
+/**
+ * Lowercase kebab-case slug for use as HTML id or URL path segment.
+ *
+ * @param {string} value
+ * @returns {string}
+ */
+export const slugify = (value) =>
+  String(value)
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");

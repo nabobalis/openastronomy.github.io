@@ -15,10 +15,8 @@ const { id, heading, intro, handles } = Astro.props;
 ---
 
 <section {id} class="container">
-  <h2 aria-label={heading}>
-    <a class="gsoc-section-link" href={`#${id}`} aria-label={heading}>
-      {heading}
-    </a>
+  <h2>
+    <a class="gsoc-section-link" href={`#${id}`}>{heading}</a>
   </h2>
   <p>{intro}</p>
   <div class="gsoc-people-grid">

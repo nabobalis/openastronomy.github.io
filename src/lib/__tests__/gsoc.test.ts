@@ -1,15 +1,10 @@
 import { describe, it, expect } from "vitest";
 import {
   normalizeArray,
-  slugify,
   formatMemberLink,
-  joinableRows,
-  isProjectFile,
+  parseProjectId,
+  buildProjectMeta,
 } from "../gsoc.ts";
-
-// ---------------------------------------------------------------------------
-// normalizeArray
-// ---------------------------------------------------------------------------
 
 describe("normalizeArray", () => {
   it("returns an array value as-is after trimming", () => {
@@ -20,48 +15,23 @@ describe("normalizeArray", () => {
     expect(normalizeArray("python")).toEqual(["python"]);
   });
 
-  it("returns an empty array for null", () => {
+  it("returns an empty array for null/undefined/empty string", () => {
     expect(normalizeArray(null)).toEqual([]);
-  });
-
-  it("returns an empty array for undefined", () => {
     expect(normalizeArray(undefined)).toEqual([]);
-  });
-
-  it("returns an empty array for an empty string", () => {
     expect(normalizeArray("")).toEqual([]);
   });
 
-  it('filters out the placeholder value "none"', () => {
-    expect(normalizeArray(["python", "none"])).toEqual(["python"]);
-  });
-
-  it('filters out the placeholder value "n/a" (case-insensitive)', () => {
-    expect(normalizeArray(["N/A", "rust"])).toEqual(["rust"]);
-  });
-
-  it('filters out the placeholder value "null"', () => {
-    expect(normalizeArray(["null"])).toEqual([]);
-  });
-
-  it("normalises a single backslash in a Windows-style path", () => {
-    // Sanity check that gsoc.ts's path-normalisation regex /\\/g
-    // converts one backslash to a forward slash (not two).
-    const winPath = "..\\content\\pages\\gsoc\\2025\\sunpy\\foo.md";
-    expect(winPath.replace(/\\/g, "/")).toBe(
-      "../content/pages/gsoc/2025/sunpy/foo.md",
-    );
-  });
-
-  it("trims whitespace from values", () => {
-    expect(normalizeArray(["  python  ", " rust "])).toEqual([
+  it("filters out placeholder values (case-insensitive)", () => {
+    expect(normalizeArray(["python", "none", "N/A", "null"])).toEqual([
       "python",
-      "rust",
     ]);
   });
 
-  it("filters out values that are blank after trimming", () => {
-    expect(normalizeArray(["python", "   "])).toEqual(["python"]);
+  it("trims whitespace and filters blank values", () => {
+    expect(normalizeArray(["  python  ", " rust ", "   "])).toEqual([
+      "python",
+      "rust",
+    ]);
   });
 
   it("coerces numbers to strings", () => {
@@ -69,53 +39,15 @@ describe("normalizeArray", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// slugify
-// ---------------------------------------------------------------------------
-
-describe("slugify", () => {
-  it("lowercases the input", () => {
-    expect(slugify("Hello World")).toBe("hello-world");
-  });
-
-  it("replaces spaces with hyphens", () => {
-    expect(slugify("my cool project")).toBe("my-cool-project");
-  });
-
-  it("collapses multiple spaces into one hyphen", () => {
-    expect(slugify("a  b")).toBe("a-b");
-  });
-
-  it("removes leading and trailing hyphens", () => {
-    expect(slugify("  leading")).toBe("leading");
-    expect(slugify("trailing  ")).toBe("trailing");
-  });
-
-  it("replaces special characters with hyphens", () => {
-    expect(slugify("C++")).toBe("c");
-    expect(slugify("node.js")).toBe("node-js");
-  });
-
-  it("preserves digits", () => {
-    expect(slugify("Project 2025")).toBe("project-2025");
-  });
-});
-
-// ---------------------------------------------------------------------------
-// formatMemberLink
-// ---------------------------------------------------------------------------
-
 const memberLookup = {
   sunpy: { name: "SunPy" },
   astropy: { name: "Astropy" },
 };
-
-/** Simple stand-in for fromSiteRoot that just prefixes with the pathname. */
 const fakeFromSiteRoot = (pathname: string, target: string) =>
   `${pathname}${target}`;
 
 describe("formatMemberLink", () => {
-  it("returns the member name and an href for a known key", () => {
+  it("returns the member name and a slugified anchor href for a known key", () => {
     const result = formatMemberLink(
       "sunpy",
       memberLookup,
@@ -123,17 +55,7 @@ describe("formatMemberLink", () => {
       fakeFromSiteRoot,
     );
     expect(result.label).toBe("SunPy");
-    expect(result.href).toContain("members");
-  });
-
-  it("uses a slugified member name in the href anchor", () => {
-    const result = formatMemberLink(
-      "astropy",
-      memberLookup,
-      "/",
-      fakeFromSiteRoot,
-    );
-    expect(result.href).toContain("#astropy");
+    expect(result.href).toContain("#sunpy");
   });
 
   it("slugifies multi-word member names for the href anchor", () => {
@@ -154,69 +76,88 @@ describe("formatMemberLink", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// joinableRows
-// ---------------------------------------------------------------------------
-
-describe("joinableRows", () => {
-  it("keeps rows that have values", () => {
-    const rows = [
-      { label: "Tags", values: ["python"] },
-      { label: "Empty", values: [] },
-    ];
-    expect(joinableRows(rows)).toEqual([{ label: "Tags", values: ["python"] }]);
+describe("parseProjectId", () => {
+  it("parses a 4-segment project id", () => {
+    expect(parseProjectId("gsoc/2026/sunpy/radiospectra")).toEqual({
+      year: "2026",
+      suborg: "sunpy",
+      fileSlug: "radiospectra",
+    });
   });
 
-  it("returns an empty array when all rows are empty", () => {
-    expect(joinableRows([{ label: "X", values: [] }])).toEqual([]);
+  it("returns null for a season id", () => {
+    expect(parseProjectId("gsoc/2025")).toBeNull();
   });
 
-  it("returns all rows when all have values", () => {
-    const rows = [
-      { label: "A", values: ["1"] },
-      { label: "B", values: ["2"] },
-    ];
-    expect(joinableRows(rows)).toHaveLength(2);
+  it("returns null for a top-level gsoc page", () => {
+    expect(parseProjectId("gsoc/background")).toBeNull();
+  });
+
+  it("returns null for a non-gsoc id", () => {
+    expect(parseProjectId("about/team")).toBeNull();
   });
 });
 
-// ---------------------------------------------------------------------------
-// isProjectFile
-// ---------------------------------------------------------------------------
+describe("buildProjectMeta", () => {
+  const pathInfo = { year: "2026", suborg: "sunpy", fileSlug: "radiospectra" };
 
-describe("isProjectFile", () => {
-  it("returns true for a valid project file", () => {
-    expect(
-      isProjectFile("../content/pages/gsoc/2025/sunpy/my-project.md", "2025"),
-    ).toBe(true);
-  });
-
-  it("returns false for index.md files", () => {
-    expect(
-      isProjectFile("../content/pages/gsoc/2025/sunpy/index.md", "2025"),
-    ).toBe(false);
-  });
-
-  it("returns false for template files starting with _", () => {
-    expect(
-      isProjectFile("../content/pages/gsoc/_project_template.md", "2025"),
-    ).toBe(false);
-  });
-
-  it("returns false for files in the wrong year", () => {
-    expect(
-      isProjectFile("../content/pages/gsoc/2024/sunpy/my-project.md", "2025"),
-    ).toBe(false);
-  });
-
-  it("returns false for files at the season root (no suborg subdir)", () => {
-    // gsoc / 2025 / project.md — only 3 parts after gsoc, needs 4
-    expect(isProjectFile("../content/pages/gsoc/2025/project.md", "2025")).toBe(
-      false,
+  it("uses the `name` field when set", () => {
+    const meta = buildProjectMeta(
+      { name: "Radio Spectra" },
+      pathInfo,
+      memberLookup,
+      "/",
+      fakeFromSiteRoot,
     );
+    expect(meta.name).toBe("Radio Spectra");
+    expect(meta.anchor).toBe("radio-spectra");
   });
 
-  it("returns false when the path contains no gsoc segment", () => {
-    expect(isProjectFile("../content/pages/other/file.md", "2025")).toBe(false);
+  it("falls back to the file slug when `name` missing", () => {
+    const meta = buildProjectMeta(
+      {},
+      pathInfo,
+      memberLookup,
+      "/",
+      fakeFromSiteRoot,
+    );
+    expect(meta.name).toBe("radiospectra");
+  });
+
+  it("builds a href to the standalone project page", () => {
+    const meta = buildProjectMeta(
+      {},
+      pathInfo,
+      memberLookup,
+      "/gsoc/2026/",
+      fakeFromSiteRoot,
+    );
+    expect(meta.href).toContain("/gsoc/2026/sunpy/radiospectra/");
+  });
+
+  it("normalises array fields and resolves collaborators", () => {
+    const meta = buildProjectMeta(
+      {
+        mentors: ["alice"],
+        initiatives: "GSOC",
+        project_size: ["350 h (Large)"],
+        tags: ["python", "none"],
+        collaborating_projects: ["sunpy", "unknown"],
+        issues: "https://github.com/x/y/issues/1",
+      },
+      pathInfo,
+      memberLookup,
+      "/",
+      fakeFromSiteRoot,
+    );
+    expect(meta.mentors).toEqual(["alice"]);
+    expect(meta.initiatives).toEqual(["GSOC"]);
+    expect(meta.projectSize).toEqual(["350 h (Large)"]);
+    expect(meta.tags).toEqual(["python"]);
+    expect(meta.collaborators).toEqual([
+      { label: "SunPy", href: "/" + "/members/#sunpy" },
+      { label: "unknown", href: null },
+    ]);
+    expect(meta.issues).toEqual(["https://github.com/x/y/issues/1"]);
   });
 });

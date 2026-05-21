@@ -1,100 +1,58 @@
 ---
+import { getCollection, render, type CollectionEntry } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PageLayout from "../layouts/PageLayout.astro";
 import ProjectsLayout from "../layouts/ProjectsLayout.astro";
+import ProjectBody from "../components/gsoc/ProjectBody.astro";
+import { members } from "../lib/members.ts";
+import { fromSiteRoot } from "../lib/relative-paths.js";
+import { buildProjectMeta, parseProjectId } from "../lib/gsoc.ts";
 
-type AstroComponentFactory = (...args: unknown[]) => unknown;
-type PageModule = {
-  frontmatter?: Record<string, unknown>;
-  Content: AstroComponentFactory;
-};
-
-type RoutedPage = {
-  slug: string | null;
-  module: PageModule;
-  frontmatter: Record<string, unknown>;
-};
-
-export const getStaticPaths = () => {
-  const pageModules = import.meta.glob<PageModule>("../content/pages/**/*.md", {
-    eager: true,
-  });
-
-  /**
-   * Converts a Vite module path like `../content/pages/gsoc/index.md` to the
-   * route slug `gsoc` (i.e. the path segment after `/pages/`, without the
-   * `.md` extension or a trailing `/index`).
-   * Returns `null` for the site root (`pages/index.md`).
-   */
-  const toRouteSlug = (modulePath: string) => {
-    const normalizedPath = modulePath.replace(/\\/g, "/");
-    const marker = "/pages/";
-    const markerIndex = normalizedPath.indexOf(marker);
-    if (markerIndex === -1) return null;
-    const relativePath = normalizedPath
-      .slice(markerIndex + marker.length)
-      .replace(/\.md$/, "")
-      .replace(/\/index$/, "");
-    return relativePath === "index" ? null : relativePath;
-  };
-
-  /**
-   * GSoC project idea files live under `gsoc/<year>/<suborg>/` and are
-   * aggregated by `ProjectsLayout` — they must not become individual routes
-   * here, otherwise Astro would generate a duplicate page for each project.
-   */
-  const isProjectContent = (routeSlug: string | null) =>
-    routeSlug === "gsoc/projects" || routeSlug?.startsWith("gsoc/projects/");
-
-  const routedPages: RoutedPage[] = (
-    Object.entries(pageModules) as [string, PageModule][]
-  )
-    .map(([modulePath, module]) => {
-      const slug = toRouteSlug(modulePath);
-      if (isProjectContent(slug)) return null;
-      return { slug, module, frontmatter: module.frontmatter ?? {} };
-    })
-    .filter((page): page is RoutedPage => page !== null)
-    .sort((a, b) => (a.slug ?? "").localeCompare(b.slug ?? ""));
-
-  return routedPages.map((page) => ({
-    params: { slug: page.slug ?? undefined },
-    props: page,
+export async function getStaticPaths() {
+  const pages = await getCollection("pages");
+  return pages.map((page: CollectionEntry<"pages">) => ({
+    params: { slug: page.id === "index" ? undefined : page.id },
+    props: { page },
   }));
-};
+}
 
-const { module, frontmatter } = Astro.props as RoutedPage;
-const { Content } = module;
+type Props = { page: CollectionEntry<"pages"> };
+const { page } = Astro.props as Props;
+const { Content } = await render(page);
 
-const slug = Astro.params.slug ?? null;
-const title =
-  (typeof frontmatter.title === "string" && frontmatter.title) ||
-  (typeof frontmatter.name === "string" && frontmatter.name) ||
-  undefined;
-const description =
-  typeof frontmatter.description === "string"
-    ? frontmatter.description
-    : undefined;
-const season = frontmatter.season;
-const isGsocSeasonPage = /^gsoc\/\d{4}$/.test(slug ?? "");
+const { title, name, description } = page.data;
+const pageTitle = title ?? name ?? undefined;
+const seasonMatch = page.id.match(/^gsoc\/(\d{4})$/);
+const projectInfo = parseProjectId(page.id);
+const projectMeta = projectInfo
+  ? buildProjectMeta(
+      page.data,
+      projectInfo,
+      members,
+      Astro.url.pathname,
+      fromSiteRoot,
+    )
+  : null;
 ---
 
 {
-  isGsocSeasonPage ? (
-    <ProjectsLayout
-      title={title}
-      description={description}
-      season={season}
-      frontmatter={frontmatter}
+  seasonMatch ? (
+    <ProjectsLayout seasonKey={seasonMatch[1]} title={pageTitle} />
+  ) : projectMeta ? (
+    <BaseLayout
+      title={projectMeta.name}
+      description={projectMeta.desc || description}
     >
-      <Content />
-    </ProjectsLayout>
-  ) : slug === "gsoc" ? (
-    <PageLayout title={title} description={description}>
+      <ProjectBody project={projectMeta} showOpenLink={false}>
+        <Content />
+      </ProjectBody>
+    </BaseLayout>
+  ) : page.id === "gsoc" ? (
+    <PageLayout title={pageTitle} description={description}>
       <Content />
     </PageLayout>
   ) : (
-    <BaseLayout title={title} description={description}>
+    <BaseLayout title={pageTitle} description={description}>
       <Content />
     </BaseLayout>
   )

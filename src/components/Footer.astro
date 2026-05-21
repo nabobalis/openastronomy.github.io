@@ -1,52 +1,24 @@
 ---
-import { Image } from "astro:assets";
+import Icon from "./Icon.astro";
 import site from "../data/site.json";
-import icons from "../data/icons.json";
-import discourseIcon from "../assets/discourse_icon.png";
-
-const githubUrl = `https://github.com/${site.github_username}`;
 ---
 
 <footer class="site-footer">
-  <div class="wrapper">
+  <div class="container">
     <p class="tagline">
       <strong>{site.title}</strong>: Combining the power of open source
       astrophysics projects to empower science.
     </p>
-    <a
-      href={site.discussiongroup_url}
-      aria-label="OpenAstronomy Discourse"
-      rel="noopener noreferrer"
-    >
-      <Image
-        src={discourseIcon}
-        alt="OpenAstronomy on Discourse"
-        width={16}
-        height={16}
-        loading="lazy"
-      />
-    </a>
-    <a
-      rel="me noopener noreferrer"
-      href={site.mastodon_url}
-      aria-label="OpenAstronomy on Mastodon"
-    >
-      <span class="icon-image icon--github">
-        <svg viewBox="0 0 16 16">
-          <path fill="#f9f9f9" d={icons.mastodon_logo}></path>
-        </svg>
-      </span>
-    </a>
-    <a
-      href={githubUrl}
-      aria-label="OpenAstronomy on GitHub"
-      rel="noopener noreferrer"
-    >
-      <span class="icon-image icon--github">
-        <svg viewBox="0 0 16 16">
-          <path fill="#f9f9f9" d={icons.gh_logo}></path>
-        </svg>
-      </span>
-    </a>
+    {
+      site.social_links.map((link) => (
+        <a
+          href={link.href}
+          aria-label={link.label}
+          rel={link.rel ?? "noopener noreferrer"}
+        >
+          <Icon name={link.icon} fill="#f9f9f9" />
+        </a>
+      ))
+    }
   </div>
 </footer>

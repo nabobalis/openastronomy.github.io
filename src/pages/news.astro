@@ -2,7 +2,7 @@
 // /news/ — lists all blog posts sorted by date, newest first.
 import PageLayout from "../layouts/PageLayout.astro";
 import { getCollection, type CollectionEntry } from "astro:content";
-import { getPostUrl, getPostDateParts, getExcerpt } from "../lib/posts.js";
+import { getPostUrl, getPostDateParts } from "../lib/posts.js";
 import { localizeHref } from "../lib/relative-paths.js";
 
 type Post = CollectionEntry<"posts">;
@@ -30,7 +30,7 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
               <a href={postHref}>{post.data.title}</a>
             </h2>
             <p class="post-meta">{dateFormatter.format(date)}</p>
-            <p>{getExcerpt(post)}</p>
+            <p>{post.data.summary ?? ""}</p>
           </article>
         );
       })

@@ -2,87 +2,70 @@
 /**
  * Layout for GSoC season pages (e.g. /gsoc/2025/).
  *
- * Aggregates all project idea files for the requested season from
- * `src/content/pages/gsoc/<year>/<suborg>/<project>.md`, then renders them
- * as a tabbed page with three sections: Projects, Mentors, Admins.
- *
- * Project data transformation is handled by `src/lib/gsoc.ts`. Rendering is
- * delegated to the focused sub-components in `src/components/gsoc/`.
+ * Loads all project entries for the requested season from the `pages`
+ * collection, then renders Projects + Mentors + Admins sections.
  */
+import { getCollection, render, type CollectionEntry } from "astro:content";
 import BaseLayout from "./BaseLayout.astro";
 import ProjectCard from "../components/gsoc/ProjectCard.astro";
 import ProjectDetail from "../components/gsoc/ProjectDetail.astro";
 import PeopleSection from "../components/gsoc/PeopleSection.astro";
-import Modal from "../components/gsoc/Modal.astro";
 import admins from "../data/gsoc-admins.json";
-import members from "../data/members.json";
+import { members } from "../lib/members.ts";
 import { fromSiteRoot } from "../lib/relative-paths.js";
-import { buildProject, isProjectFile } from "../lib/gsoc.ts";
-import type { ProjectModule } from "../lib/gsoc.ts";
+import {
+  buildProjectMeta,
+  parseProjectId,
+  type GsocProject,
+} from "../lib/gsoc.ts";
 
-const frontmatter = Astro.props.frontmatter ?? {};
+type Props = { seasonKey: string; title?: string };
+const { seasonKey, title } = Astro.props as Props;
 const pagePath = Astro.url.pathname;
-const title = Astro.props.title ?? frontmatter.title;
-const season = Astro.props.season ?? frontmatter.season;
+const pageTitle = title ? `${title} (${seasonKey})` : `GSoC ${seasonKey}`;
 
-// Prefer the year extracted from the URL path over the frontmatter `season`
-// field, since the URL is authoritative and avoids stale frontmatter issues.
-const seasonMatch = Astro.url.pathname.match(/\/gsoc\/(\d{4})(?:\/|$)/);
-const seasonKey = (
-  seasonMatch ? seasonMatch[1] : String(season ?? "").trim()
-).trim();
-
-const pageTitle = seasonKey
-  ? title
-    ? `${title} (${seasonKey})`
-    : `GSoC ${seasonKey}`
-  : (title ?? "OpenAstronomy");
-
-// Eagerly load all GSoC markdown files; filter and transform in one pass below.
-const projectModules = import.meta.glob<ProjectModule>(
-  "../content/pages/gsoc/**/*.md",
-  { eager: true },
+const adminLookup = admins as Record<string, string[]>;
+const pageEntries = await getCollection("pages");
+type SeasonEntry = {
+  entry: CollectionEntry<"pages">;
+  info: NonNullable<ReturnType<typeof parseProjectId>>;
+};
+const seasonEntries: SeasonEntry[] = pageEntries.flatMap(
+  (entry: CollectionEntry<"pages">) => {
+    const info = parseProjectId(entry.id);
+    return info?.year === seasonKey ? [{ entry, info }] : [];
+  },
 );
 
-const memberLookup = members as Record<string, { name?: string }>;
-const adminLookup = admins as Record<string, string[]>;
-
-const projects = (Object.entries(projectModules) as [string, ProjectModule][])
-  .filter(([path]) => isProjectFile(path.replace(/\\/g, "/"), seasonKey))
-  .map(([path, mod]) =>
-    buildProject(path, mod, seasonKey, memberLookup, pagePath, fromSiteRoot),
+const projects: GsocProject[] = (
+  await Promise.all(
+    seasonEntries.map(async ({ entry, info }: SeasonEntry) => {
+      const meta = buildProjectMeta(
+        entry.data,
+        info,
+        members,
+        pagePath,
+        fromSiteRoot,
+      );
+      const { Content } = await render(entry);
+      return { ...meta, Content };
+    }),
   )
-  .sort((a, b) => a.name.localeCompare(b.name));
+).sort((a, b) => a.name.localeCompare(b.name));
 
 const mentors = Array.from(
   new Set(projects.flatMap((p) => p.mentors).filter(Boolean)),
-).sort((a, b) => a.localeCompare(b));
-
+).sort();
 const adminHandles = adminLookup[seasonKey] ?? [];
 
-const projectsSectionLabel = `GSoC Projects for ${seasonKey}`;
-const mentorsSectionLabel = `Mentors for ${seasonKey}`;
-const adminsSectionLabel = `Admins for ${seasonKey}`;
-
-const sectionLinks = [
-  { id: "projects", label: "Projects", heading: projectsSectionLabel },
-  { id: "mentors", label: "Mentors", heading: mentorsSectionLabel },
-  { id: "admins", label: "Admins", heading: adminsSectionLabel },
-];
-
-const peopleSections = [
+const sections = [
   {
-    id: "mentors",
-    heading: mentorsSectionLabel,
-    intro: `We are the mentors for OpenAstronomy in GSoC ${seasonKey}.`,
-    handles: mentors,
+    id: "projects",
+    label: "Projects",
+    heading: `GSoC Projects for ${seasonKey}`,
   },
-  {
-    id: "admins",
-    heading: adminsSectionLabel,
-    intro: "We are the admins for OpenAstronomy.",
-    handles: adminHandles,
-  },
+  { id: "mentors", label: "Mentors", heading: `Mentors for ${seasonKey}` },
+  { id: "admins", label: "Admins", heading: `Admins for ${seasonKey}` },
 ];
 ---
 
@@ -91,25 +74,14 @@ const peopleSections = [
     <div class="page-content">
       <div class="container">
         <nav class="gsoc-tabs">
-          {
-            sectionLinks.map((section) => (
-              <a href={`#${section.id}`} aria-label={section.heading}>
-                {section.label}
-              </a>
-            ))
-          }
+          {sections.map((s) => <a href={`#${s.id}`}>{s.label}</a>)}
         </nav>
       </div>
 
       <section id="projects" class="container">
-        <h2 aria-label={projectsSectionLabel}>
-          <a
-            class="gsoc-section-link"
-            href="#projects"
-            aria-label={projectsSectionLabel}
+        <h2>
+          <a class="gsoc-section-link" href="#projects">{sections[0].heading}</a
           >
-            {projectsSectionLabel}
-          </a>
         </h2>
         {projects.length === 0 ? <p>No projects listed yet.</p> : null}
         <div class="gsoc-projects-grid">
@@ -124,18 +96,31 @@ const peopleSections = [
         </div>
       </section>
 
-      {
-        peopleSections.map((section) => (
-          <PeopleSection
-            id={section.id}
-            heading={section.heading}
-            intro={section.intro}
-            handles={section.handles}
-          />
-        ))
-      }
-
-      <Modal />
+      <PeopleSection
+        id="mentors"
+        heading={sections[1].heading}
+        intro={`We are the mentors for OpenAstronomy in GSoC ${seasonKey}.`}
+        handles={mentors}
+      />
+      <PeopleSection
+        id="admins"
+        heading={sections[2].heading}
+        intro="We are the admins for OpenAstronomy."
+        handles={adminHandles}
+      />
     </div>
   </div>
 </BaseLayout>
+
+<script>
+  document
+    .querySelectorAll<HTMLButtonElement>(".gsoc-project-card[data-detail]")
+    .forEach((card) => {
+      const detailId = card.dataset.detail;
+      if (!detailId) return;
+      card.addEventListener("click", () => {
+        const dialog = document.getElementById(detailId);
+        if (dialog instanceof HTMLDialogElement) dialog.showModal();
+      });
+    });
+</script>

@@ -6,14 +6,14 @@
     "repositories": {
       "github": "astropy/astropy"
     },
-    "mailinglist": {
+    "mailinglists": {
       "users": "http://mail.python.org/mailman/listinfo/astropy",
       "devs": "http://groups.google.com/group/astropy-dev"
     },
-    "chat": {
+    "chats": {
       "slack": "http://joinslack.astropy.org/"
     },
-    "microblogging": {
+    "socials": {
       "x": "astropy"
     },
     "description": "is a community-driven package intended to contain much of the core functionality and some common tools needed for performing astronomy and astrophysics with Python."
@@ -25,10 +25,10 @@
     "repositories": {
       "github": "astronomy-commons/"
     },
-    "mailinglist": {
+    "mailinglists": {
       "devs": "https://groups.google.com/forum/#!forum/astronomy-commons"
     },
-    "chat": {
+    "chats": {
       "matrix": "https://app.element.io/#/room/#astronomy-commons:matrix.org"
     },
     "description": "is an initiative for software infrastructure for science platforms and scalable astronomy on cloud resources. Astronomy Data Commons is lead by researchers at the DiRAC Institute at the University of Washington."
@@ -40,7 +40,7 @@
     "repositories": {
       "github": "ctlearn-project/ctlearn"
     },
-    "chat": {
+    "chats": {
       "matrix": "https://app.element.io/#/room/#ctlearn:matrix.org"
     },
     "description": "is a package under active development that pursues the application of deep-learning based methods to the analysis of data from imaging atmospheric Cherenkov telescopes (IACTs). <a href=\"https://github.com/ctlearn-project\">CTLearn</a> includes modules for loading and manipulating IACT data and for running machine learning models using pixel-wise camera data as input. Its high-level interface provides a configuration-file-based workflow to drive reproducible training and prediction."
@@ -52,13 +52,13 @@
     "repositories": {
       "github": "einsteinpy/einsteinpy"
     },
-    "mailinglist": {
+    "mailinglists": {
       "devs": "https://groups.io/g/einsteinpy-dev"
     },
-    "chat": {
+    "chats": {
       "matrix": "https://app.element.io/#/room/#einsteinpy:matrix.org"
     },
-    "microblogging": {
+    "socials": {
       "x": "EinsteinPy"
     },
     "description": "is a python package for solving problems in general relativity. Computations can be done for Schwarzschild, Kerr and Kerr-Newman geometries. Visualising relativistic orbits, advancement of perihelion can be simulated in seconds. See <a href=\"https://docs.einsteinpy.org/\">documentation</a> for more information."
@@ -70,11 +70,11 @@
     "repositories": {
       "github": "glue-viz/glue"
     },
-    "mailinglist": {
+    "mailinglists": {
       "users": "https://groups.google.com/group/glue-viz",
       "devs": "https://groups.google.com/group/glue-viz-dev"
     },
-    "microblogging": {
+    "socials": {
       "x": "glueviz"
     },
     "description": "is a data visualization application and library to explore relationships within and among related datasets. Its main features include linked statistical graphs, flexible linking across data, and full Python scripting capability."
@@ -86,10 +86,10 @@
     "repositories": {
       "github": "JuliaAstro"
     },
-    "mailinglist": {
+    "mailinglists": {
       "users": "https://discourse.julialang.org/c/domain/astro"
     },
-    "chat": {
+    "chats": {
       "slack": "https://app.slack.com/client/T68168MUP/CMXU6SD7V",
       "zulip": "https://julialang.zulipchat.com/#narrow/channel/astronomy"
     },
@@ -102,13 +102,13 @@
     "repositories": {
       "github": "poliastro/poliastro"
     },
-    "mailinglist": {
+    "mailinglists": {
       "devs": "https://groups.io/g/poliastro-dev"
     },
-    "chat": {
+    "chats": {
       "matrix": "https://app.element.io/#/room/#poliastro:matrix.org"
     },
-    "microblogging": {
+    "socials": {
       "x": "poliastro_py",
       "mastodon": "@poliastro@fosstodon.org"
     },
@@ -121,14 +121,14 @@
     "repositories": {
       "github": "sunpy/sunpy"
     },
-    "mailinglist": {
+    "mailinglists": {
       "users": "http://groups.google.com/group/sunpy",
       "devs": "http://groups.google.com/group/sunpy-dev"
     },
-    "chat": {
+    "chats": {
       "matrix": "https://app.element.io/#/room/#sunpy:openastronomy.org"
     },
-    "microblogging": {
+    "socials": {
       "x": "SunPyProject"
     },
     "description": "is a community-developed free and open-source software package for solar physics. SunPy is meant to be a free alternative to the <a href=\"http://www.lmsal.com/solarsoft/\" target=\"_blank\">SolarSoft</a> and its aim is to provide the software tools necessary so that anyone can analyze solar data."
@@ -140,7 +140,7 @@
     "repositories": {
       "github": "StingraySoftware"
     },
-    "chat": {
+    "chats": {
       "slack": "https://join.slack.com/t/stingraysoftware/shared_invite/zt-49kv4kba-mD1Y~s~rlrOOmvqM7mZugQ"
     },
     "description": ": we are a team of astrophysicists and software developers working together to build a variability analysis software to study black holes and fundamental physics under extreme conditions."
@@ -161,7 +161,7 @@
     "repositories": {
       "github": "chianti-atomic/ChiantiPy"
     },
-    "mailinglist": {
+    "mailinglists": {
       "users": "https://lists.sourceforge.net/lists/listinfo/chiantipy-users"
     },
     "description": "is a Python interface to the <a href=\"http://www.chiantidatabase.org/\" target=\"_blank\"> CHIANTI atomic database </a> for astrophysical spectroscopy. CHIANTI consists of a database of atomic data that can be used to interpret spectral lines and continua emitted from high-temperature, optically-thin astrophysical sources."
@@ -173,7 +173,7 @@
     "repositories": {
       "github": "COINtoolbox"
     },
-    "mailinglist": {
+    "mailinglists": {
       "admin (Rafael S. de Souza)": "mailto:rafael.2706@gmail.com"
     },
     "description": "(COsmostatistics INitiative) is an international working group built under the auspices of the International Astrostatistics Association (<a href=\"https://asaip.psu.edu/organizations/iaa\" target=\"_blank\">IAA</a>). It aims to create an interdisciplinary environment where collaborations between astronomers, statisticians and machine learning experts can flourish. COIN is designed to promote the development of a new family of tools for data exploration in astrophysics and cosmology."
@@ -185,7 +185,7 @@
     "repositories": {
       "savannah": "https://git.savannah.gnu.org/cgit/gnuastro.git"
     },
-    "mailinglist": {
+    "mailinglists": {
       "users": "https://lists.gnu.org/mailman/listinfo/help-gnuastro",
       "devs": "https://lists.gnu.org/mailman/listinfo/gnuastro-devel"
     },
@@ -198,10 +198,10 @@
     "repositories": {
       "bitbucket": "italianmarssociety/"
     },
-    "mailinglist": {
+    "mailinglists": {
       "admin": "mailto:gsoc@marssociety.it"
     },
-    "microblogging": {
+    "socials": {
       "x": "marssociety"
     },
     "description": "(IMS) is a non-profit organization, existing from 2004, as Italian branch of the International Mars Society, created in the USA by Robert Zubrin. IMS is a member of the Mars Society European network. The foundation scope of the Italian Mars Society is to promote research projects devoted to Mars Exploration and the involvement of SMEs and large enterprises in the new economy related to space exploration. <br/> IMS is currently spearheading the <a href=\"http://www.mars-city.org/\" _target=\"_blank\">MARS CITY</a> project. The project aims to address the major issues that could jeopardize a crewed mission to Mars and are not adequately being addressed at existing terrestrial Mars analogs."
@@ -213,13 +213,13 @@
     "repositories": {
       "github": "plasmapy/plasmapy"
     },
-    "mailinglist": {
+    "mailinglists": {
       "users": "https://groups.google.com/group/plasmapy"
     },
-    "chat": {
+    "chats": {
       "matrix": "https://app.element.io/#/room/#plasmapy:matrix.org"
     },
-    "microblogging": {
+    "socials": {
       "x": "plasmapy"
     },
     "description": "aims to be a collection of functionality commonly used and shared between plasma physicists and researchers globally, running within and leveraging the open source scientific Python ecosystem."
@@ -231,13 +231,13 @@
     "repositories": {
       "github": "radis/radis"
     },
-    "mailinglist": {
+    "mailinglists": {
       "users": "https://groups.google.com/forum/#!forum/radis-radiation"
     },
-    "chat": {
+    "chats": {
       "gitter": "https://gitter.im/radis-radiation/community"
     },
-    "microblogging": {
+    "socials": {
       "x": "radis_radiation"
     },
     "description": "A fast line-by-line code for high-resolution infrared molecular spectra. RADIS can compute spectra of millions of lines within seconds. Also includes a post-processing tools to compare experimental spectra with spectra calculated in RADIS or other spectral codes."
@@ -258,14 +258,14 @@
     "repositories": {
       "github": "yt-project/yt"
     },
-    "mailinglist": {
+    "mailinglists": {
       "users": "https://mail.python.org/archives/list/yt-users@python.org/",
       "devs": "https://mail.python.org/archives/list/yt-dev@python.org/"
     },
-    "chat": {
+    "chats": {
       "slack": "https://yt-project.slack.com/"
     },
-    "microblogging": {
+    "socials": {
       "x": "yt_astro"
     },
     "description": "is a python package for analyzing and visualizing volumetric, multi-resolution data from astrophysical simulations, radio telescopes, and a burgeoning interdisciplinary community."
@@ -277,7 +277,7 @@
     "repositories": {
       "github": "lincc-frameworks"
     },
-    "chat": {
+    "chats": {
       "slack": "https://join.slack.com/t/gsoc26arrowforastro/shared_invite/zt-3qpirqhkg-qTHUg4R0iMewhIprewR1eg"
     },
     "description": "builds open-source tools for scalable data analysis in astronomy, aimed at enabling scientific discovery with large datasets."
@@ -289,7 +289,7 @@
     "repositories": {
       "github": "reltrans"
     },
-    "chat": {
+    "chats": {
       "slack": "https://join.slack.com/t/reltrans-workspace/shared_invite/zt-3p234fciq-lD12LDPTCCPf0DTT1ZocmQ"
     },
     "description": "Reltrans (Relativistic transfer functions) is a publicly available, semi-analytical model for X-ray reverberation mapping of accreting black holes in both AGN and X-ray binaries. It can be used to compute both time-averaged spectra and energy-dependent, Fourier domain cross spectra."

@@ -1,105 +1,19 @@
 ---
 /**
- * Hidden <template> holding the expanded detail panel for a GSoC project.
- *
- * Browsers do not render <template> content; Modal.astro clones it on demand
- * when the user clicks the matching ProjectCard. This avoids the double-render
- * and DOM weight of keeping the panel hidden but rendered.
- *
- * The template id must match the card's `data-project-detail` attribute.
+ * <dialog> holding one project's metadata + body, opened by ProjectCard.
  */
 import type { GsocProject } from "../../lib/gsoc.ts";
+import ProjectBody from "./ProjectBody.astro";
 
 const { project } = Astro.props as { project: GsocProject };
 const ProjectContent = project.Content;
 ---
 
-<template id={`detail-${project.anchor}`}>
-  <div class="gsoc-project-detail">
-    <p class="gsoc-project-detail-link">
-      <a href={project.href}>Open project page</a>
-    </p>
-    <h3>{project.name}</h3>
-    {project.desc ? <p>{project.desc}</p> : null}
-
-    {
-      project.requirements.length > 0 ? (
-        <div>
-          <strong>Requirements:</strong>
-          <ul>
-            {project.requirements.map((req) => (
-              <li>{req}</li>
-            ))}
-          </ul>
-        </div>
-      ) : null
-    }
-
-    {
-      project.detailRows.map((row) => (
-        <div>
-          <strong>{row.label}:</strong> {row.values.join(", ")}
-        </div>
-      ))
-    }
-
-    {
-      project.mentors.length > 0 ? (
-        <div>
-          <strong>Mentors:</strong>{" "}
-          {project.mentors.map((mentor, index) => (
-            <>
-              {index > 0 ? ", " : ""}
-              <a
-                href={`https://github.com/${mentor}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                @{mentor}
-              </a>
-            </>
-          ))}
-        </div>
-      ) : null
-    }
-
-    {
-      project.issues.length > 0 ? (
-        <div>
-          <strong>Related issues:</strong>
-          <ul>
-            {project.issues.map((issue) => (
-              <li>
-                <a href={issue} target="_blank" rel="noopener noreferrer">
-                  {issue}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null
-    }
-
-    {
-      project.collaborators.length > 0 ? (
-        <div>
-          <strong>Collaborating projects:</strong>{" "}
-          {project.collaborators.map((collaborator, index) => (
-            <>
-              {index > 0 ? ", " : ""}
-              {collaborator.href ? (
-                <a href={collaborator.href}>{collaborator.label}</a>
-              ) : (
-                collaborator.label
-              )}
-            </>
-          ))}
-        </div>
-      ) : null
-    }
-
-    <div class="gsoc-project-body">
-      <ProjectContent />
-    </div>
-  </div>
-</template>
+<dialog class="gsoc-project-detail" id={`detail-${project.anchor}`}>
+  <form method="dialog">
+    <button class="gsoc-modal-close" type="submit">Close</button>
+  </form>
+  <ProjectBody project={project}>
+    <ProjectContent />
+  </ProjectBody>
+</dialog>
