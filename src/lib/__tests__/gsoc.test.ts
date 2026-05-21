@@ -44,6 +44,15 @@ describe("normalizeArray", () => {
     expect(normalizeArray(["null"])).toEqual([]);
   });
 
+  it("normalises a single backslash in a Windows-style path", () => {
+    // Sanity check that gsoc.ts's path-normalisation regex /\\/g
+    // converts one backslash to a forward slash (not two).
+    const winPath = "..\\content\\pages\\gsoc\\2025\\sunpy\\foo.md";
+    expect(winPath.replace(/\\/g, "/")).toBe(
+      "../content/pages/gsoc/2025/sunpy/foo.md",
+    );
+  });
+
   it("trims whitespace from values", () => {
     expect(normalizeArray(["  python  ", " rust "])).toEqual([
       "python",
@@ -117,14 +126,20 @@ describe("formatMemberLink", () => {
     expect(result.href).toContain("members");
   });
 
-  it("encodes the member name in the href anchor", () => {
+  it("uses a slugified member name in the href anchor", () => {
     const result = formatMemberLink(
       "astropy",
       memberLookup,
       "/",
       fakeFromSiteRoot,
     );
-    expect(result.href).toContain(encodeURIComponent("Astropy"));
+    expect(result.href).toContain("#astropy");
+  });
+
+  it("slugifies multi-word member names for the href anchor", () => {
+    const lookup = { aetheria: { name: "Astronomy Data Commons" } };
+    const result = formatMemberLink("aetheria", lookup, "/", fakeFromSiteRoot);
+    expect(result.href).toContain("#astronomy-data-commons");
   });
 
   it("returns the raw key with a null href for an unknown member", () => {

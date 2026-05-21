@@ -5,13 +5,20 @@
  * Displays the member's logo, name, a link to their website, and lists of
  * repository and social links built by src/lib/members.ts.
  *
- * Props: member (MemberDetails object from members.json) and memberKey
- * (the JSON key, used to resolve repository provider icons and links).
+ * Props:
+ *   memberKey - JSON key (used to resolve repository provider icons and links)
+ *   details   - MemberDetails object from members.json
+ *   eager     - when true, logo is loaded eagerly (default false)
+ *
+ * Note: `details.description` is rendered with `set:html` because it may
+ * contain inline links and emphasis. The source (`src/data/members.json`) is
+ * trusted, repository-controlled content — do NOT pass untrusted input here.
  */
 import { Image } from "astro:assets";
 import type { ImageMetadata } from "astro";
 import icons from "../data/icons.json";
 import { buildRepositoryLinks, buildSocialLinks } from "../lib/members.ts";
+import { slugify } from "../lib/slug.ts";
 
 type MemberDetails = {
   name: string;
@@ -24,9 +31,14 @@ type MemberDetails = {
   microblogging?: Record<string, string>;
 };
 
-const { memberKey, details } = Astro.props as {
+const {
+  memberKey,
+  details,
+  eager = false,
+} = Astro.props as {
   memberKey: string;
   details: MemberDetails;
+  eager?: boolean;
 };
 
 const mailingLists = details.mailinglist
@@ -35,6 +47,7 @@ const mailingLists = details.mailinglist
 const chats = details.chat ? Object.entries(details.chat) : [];
 const repositoryLinks = buildRepositoryLinks(details.repositories, memberKey);
 const socialLinks = buildSocialLinks(details.microblogging);
+const anchorId = slugify(details.name);
 
 const memberLogoModules = import.meta.glob<{ default: ImageMetadata }>(
   "../assets/members/*.{png,jpg,jpeg,webp,avif}",
@@ -53,22 +66,32 @@ if (!logoAsset) {
 ---
 
 <div class="d-flex align-items-start gap-3">
-  <a href={details.url} class="flex-shrink-0">
+  <a
+    href={details.url}
+    class="flex-shrink-0"
+    rel="noopener noreferrer"
+    target="_blank"
+  >
     <Image
       class="member-logo"
       src={logoAsset}
       alt={memberKey}
-      loading="eager"
-      fetchpriority="high"
+      loading={eager ? "eager" : "lazy"}
+      fetchpriority={eager ? "high" : "auto"}
     />
   </a>
-  <div id={details.name} class="flex-grow-1">
-    <a href={details.url} class="project" target="_blank">{details.name}</a>
+  <div id={anchorId} class="flex-grow-1">
+    <a
+      href={details.url}
+      class="project"
+      target="_blank"
+      rel="noopener noreferrer">{details.name}</a
+    >
     <span set:html={details.description ?? ""} />
     <br />
     {
       repositoryLinks.map((repository) => (
-        <a href={repository.href} target="_blank">
+        <a href={repository.href} target="_blank" rel="noopener noreferrer">
           <span class="icon icon--github">
             <svg height={repository.height} viewBox={repository.viewBox}>
               <path fill="#333333" d={repository.icon} />
@@ -85,7 +108,9 @@ if (!logoAsset) {
           <span class="icon icon-envelope" />
           {mailingLists.map(([label, url], index) => (
             <>
-              <a href={url}>{label}</a>
+              <a href={url} rel="noopener noreferrer">
+                {label}
+              </a>
               {index < mailingLists.length - 1 ? "," : ""}
             </>
           ))}
@@ -103,7 +128,9 @@ if (!logoAsset) {
           </span>
           {chats.map(([label, url], index) => (
             <>
-              <a href={url}>{label}</a>
+              <a href={url} rel="noopener noreferrer">
+                {label}
+              </a>
               {index < chats.length - 1 ? "," : ""}
             </>
           ))}
@@ -113,7 +140,7 @@ if (!logoAsset) {
     }
     {
       socialLinks.map((socialLink) => (
-        <a href={socialLink.href} target="_blank">
+        <a href={socialLink.href} target="_blank" rel="noopener noreferrer">
           <span class="icon icon--github">
             <svg height="50%" viewBox="0 0 16 16">
               <path fill="#333333" d={socialLink.icon} />

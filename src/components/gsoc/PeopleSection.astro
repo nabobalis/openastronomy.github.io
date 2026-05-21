@@ -34,7 +34,11 @@ const { id, heading, intro, handles } = Astro.props;
             loading="lazy"
           />
           <div>
-            <a href={`https://github.com/${handle}`} target="_blank">
+            <a
+              href={`https://github.com/${handle}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               @{handle}
             </a>
           </div>

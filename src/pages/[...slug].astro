@@ -27,7 +27,7 @@ export const getStaticPaths = () => {
    * Returns `null` for the site root (`pages/index.md`).
    */
   const toRouteSlug = (modulePath: string) => {
-    const normalizedPath = modulePath.replace(/\\\\/g, "/");
+    const normalizedPath = modulePath.replace(/\\/g, "/");
     const marker = "/pages/";
     const markerIndex = normalizedPath.indexOf(marker);
     if (markerIndex === -1) return null;

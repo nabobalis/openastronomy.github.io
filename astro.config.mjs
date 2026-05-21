@@ -7,4 +7,12 @@ export default defineConfig({
   build: {
     format: "directory",
   },
+  prefetch: true,
+  vite: {
+    server: {
+      watch: {
+        ignored: ["**/.history/**", "**/html/**"],
+      },
+    },
+  },
 });

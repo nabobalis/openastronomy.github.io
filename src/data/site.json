@@ -1,12 +1,10 @@
 {
   "title": "OpenAstronomy",
-  "email": "",
   "description": "Where all about the combined force of different open source projects in astronomy and astrophysics takes place.",
   "url": "https://openastronomy.org",
-  "x_username": "Open_Astronomy",
   "github_username": "openastronomy",
-  "irc_channel": "openastronomy",
   "discussiongroup_url": "https://community.openastronomy.org",
+  "mastodon_url": "https://floss.social/@OpenAstronomy",
   "nav_links": {
     "Contributor Blogs": "http://openastronomy.org/Universe_OA"
   },

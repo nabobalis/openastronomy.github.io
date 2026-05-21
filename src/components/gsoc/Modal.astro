@@ -3,8 +3,8 @@
  * Modal overlay for displaying a GSoC project's detail panel.
  *
  * The modal is initially `hidden`. When a ProjectCard button is clicked, the
- * corresponding ProjectDetail element's inner HTML is copied into the modal
- * content area and the modal is shown. Closing can be done via:
+ * matching ProjectDetail <template> is cloned into the modal content area and
+ * the modal is shown. Closing can be done via:
  *   - The "Close" button
  *   - Clicking the backdrop
  *   - Pressing Escape
@@ -34,16 +34,16 @@
     if (!modal || !content) return;
 
     const openModal = (detailId: string) => {
-      const detail = document.getElementById(detailId);
-      if (!detail) return;
-      content.innerHTML = detail.innerHTML;
+      const template = document.getElementById(detailId);
+      if (!(template instanceof HTMLTemplateElement)) return;
+      content.replaceChildren(template.content.cloneNode(true));
       modal.hidden = false;
       document.body.style.overflow = "hidden";
     };
 
     const closeModal = () => {
       modal.hidden = true;
-      content.innerHTML = "";
+      content.replaceChildren();
       document.body.style.overflow = "";
     };
 

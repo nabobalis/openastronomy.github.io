@@ -3,6 +3,8 @@ import { Image } from "astro:assets";
 import site from "../data/site.json";
 import icons from "../data/icons.json";
 import discourseIcon from "../assets/discourse_icon.png";
+
+const githubUrl = `https://github.com/${site.github_username}`;
 ---
 
 <footer class="site-footer">
@@ -12,8 +14,9 @@ import discourseIcon from "../assets/discourse_icon.png";
       astrophysics projects to empower science.
     </p>
     <a
-      href="https://community.openastronomy.org"
+      href={site.discussiongroup_url}
       aria-label="OpenAstronomy Discourse"
+      rel="noopener noreferrer"
     >
       <Image
         src={discourseIcon}
@@ -24,8 +27,8 @@ import discourseIcon from "../assets/discourse_icon.png";
       />
     </a>
     <a
-      rel="me"
-      href="https://floss.social/@OpenAstronomy"
+      rel="me noopener noreferrer"
+      href={site.mastodon_url}
       aria-label="OpenAstronomy on Mastodon"
     >
       <span class="icon-image icon--github">
@@ -35,8 +38,9 @@ import discourseIcon from "../assets/discourse_icon.png";
       </span>
     </a>
     <a
-      href="https://github.com/openastronomy"
+      href={githubUrl}
       aria-label="OpenAstronomy on GitHub"
+      rel="noopener noreferrer"
     >
       <span class="icon-image icon--github">
         <svg viewBox="0 0 16 16">

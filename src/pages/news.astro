@@ -1,12 +1,14 @@
 ---
 // /news/ — lists all blog posts sorted by date, newest first.
 import PageLayout from "../layouts/PageLayout.astro";
-import { getCollection } from "astro:content";
+import { getCollection, type CollectionEntry } from "astro:content";
 import { getPostUrl, getPostDateParts, getExcerpt } from "../lib/posts.js";
 import { localizeHref } from "../lib/relative-paths.js";
 
+type Post = CollectionEntry<"posts">;
 const posts = (await getCollection("posts")).sort(
-  (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime(),
+  (a: Post, b: Post) =>
+    new Date(b.data.date).getTime() - new Date(a.data.date).getTime(),
 );
 const pagePath = Astro.url.pathname;
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
@@ -19,7 +21,7 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
 <PageLayout title="News and Events">
   <div>
     {
-      posts.map((post) => {
+      posts.map((post: Post) => {
         const { date } = getPostDateParts(post);
         const postHref = localizeHref(pagePath, getPostUrl(post));
         return (

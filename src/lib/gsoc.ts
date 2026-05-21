@@ -5,6 +5,9 @@
  * tested. All functions are pure (no side effects, no Astro-runtime imports).
  */
 
+import { slugify } from "./slug.ts";
+export { slugify } from "./slug.ts";
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -78,25 +81,12 @@ export const normalizeArray = (value: unknown): string[] => {
 };
 
 /**
- * Converts a string to a lowercase kebab-case slug suitable for use as an
- * HTML `id` attribute or URL path segment.
- *
- * @param value - Input string.
- * @returns Slugified string (e.g. `"My Cool Project"` → `"my-cool-project"`).
- */
-export const slugify = (value: string): string =>
-  value
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-
-/**
  * Resolves a `collaborating_projects` key from a project's frontmatter to a
  * display label and optional href pointing to the member's entry on `/members/`.
  *
  * If the key is found in `memberLookup` the member's full name is used as the
- * label and a relative URL to the members page anchor is returned.
+ * label and a relative URL to the members page anchor is returned. Anchor is
+ * the slugified member name so it matches the id rendered by MemberCard.
  * If the key is unknown the raw key string is shown without a link.
  *
  * @param key - The member key as written in the project's frontmatter.
@@ -115,10 +105,7 @@ export const formatMemberLink = (
   if (member?.name) {
     return {
       label: member.name,
-      href: fromSiteRoot(
-        pagePath,
-        `/members/#${encodeURIComponent(member.name)}`,
-      ),
+      href: fromSiteRoot(pagePath, `/members/#${slugify(member.name)}`),
     };
   }
   return { label: key, href: null };

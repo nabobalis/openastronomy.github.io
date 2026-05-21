@@ -301,10 +301,6 @@ footer.site-footer .wrapper .tagline {
   font-weight: 600;
 }
 
-.gsoc-project-detail[hidden] {
-  display: none;
-}
-
 .gsoc-project-detail-link {
   margin: 0 0 8px;
   font-size: 0.85em;

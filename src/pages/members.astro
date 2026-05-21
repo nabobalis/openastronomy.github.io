@@ -13,9 +13,9 @@ const sortedMembers = Object.entries(members).sort(([a], [b]) =>
 
   <div class="row g-3">
     {
-      sortedMembers.map(([key, details]) => (
+      sortedMembers.map(([key, details], index) => (
         <div class="col-12 col-md-6 pb-3">
-          <MemberCard memberKey={key} details={details} />
+          <MemberCard memberKey={key} details={details} eager={index < 4} />
         </div>
       ))
     }
