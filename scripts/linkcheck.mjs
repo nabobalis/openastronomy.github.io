@@ -3,45 +3,17 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 
 const DEFAULT_ROOT = "html";
-const DEFAULT_SKIP_FILE = "linkcheck.skip.txt";
-const DEFAULT_TIMEOUT_MS = 10000;
-const DEFAULT_CONCURRENCY = 20;
 
 const HREF_RE = /\s(?:href|src)=['"]([^'"]+)['"]/gi;
 const SRCSET_RE = /\ssrcset=['"]([^'"]+)['"]/gi;
 const ID_RE = /\s(?:id|name)=['"]([^'"]+)['"]/gi;
 
 export const parseMode = (value = "internal") => {
-  if (value === "internal" || value === "external") return value;
+  if (value === "internal") return value;
   throw new Error(
-    `Unknown linkcheck mode "${value}". Use "internal" or "external".`,
+    "External link checking has been removed. Only internal links and anchors are checked.",
   );
 };
-
-export const parsePositiveInteger = (value, fallback, name) => {
-  const raw = value ?? String(fallback);
-  const parsed = Number(raw);
-  if (!Number.isInteger(parsed) || parsed < 1) {
-    throw new Error(`${name} must be a positive integer; got "${raw}".`);
-  }
-  return parsed;
-};
-
-export const loadSkipPatterns = (skipFile = DEFAULT_SKIP_FILE) =>
-  (existsSync(skipFile)
-    ? readFileSync(skipFile, "utf8")
-        .split(/\r?\n/)
-        .map((line) => line.trim())
-        .filter((line) => line && !line.startsWith("#"))
-    : []
-  ).flatMap((line) => {
-    try {
-      return [new RegExp(line)];
-    } catch {
-      console.warn(`Invalid skip pattern ignored: ${line}`);
-      return [];
-    }
-  });
 
 export const collectHtmlFiles = (dir, out = []) => {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -81,16 +53,13 @@ export const parseFile = (file, cache = new Map()) => {
   return data;
 };
 
-export const isSkippable = (link, mode, skipPatterns = []) => {
+export const isSkippable = (link) => {
   if (!link || link === "#") return true;
   const lower = link.toLowerCase();
-  if (lower.startsWith("javascript:") || lower.startsWith("data:")) return true;
-  if (mode === "internal") {
-    if (/^(mailto:|tel:|irc:|ftp:|https?:\/\/)/i.test(link)) return true;
-  } else if (!/^https?:\/\//i.test(link)) {
+  if (lower.startsWith("javascript:") || lower.startsWith("data:")) {
     return true;
   }
-  return skipPatterns.some((pattern) => pattern.test(link));
+  return /^(mailto:|tel:|irc:|ftp:|https?:\/\/)/i.test(link);
 };
 
 export const resolveInternal = (link, current, rootPath) => {
@@ -144,8 +113,9 @@ export const resolveInternal = (link, current, rootPath) => {
 export const showSource = (file, rootPath, rootLabel) => {
   const rel = path.relative(rootPath, file).split(path.sep).join("/");
   if (rel === "index.html") return `${rootLabel}/`;
-  if (rel.endsWith("/index.html"))
+  if (rel.endsWith("/index.html")) {
     return `${rootLabel}/${rel.slice(0, -"index.html".length)}`;
+  }
   return `${rootLabel}/${rel}`;
 };
 
@@ -165,13 +135,9 @@ const reportFailures = (failures, scanned, startTime) => {
   for (const [source, items] of grouped) {
     console.error(source);
     for (const failure of items) {
-      const tag =
-        failure.kind === "anchor"
-          ? "ANCHOR"
-          : failure.kind === "external"
-            ? "ERR"
-            : "404";
-      console.error(`  [${tag}] ${failure.target}`);
+      console.error(
+        `  [${failure.kind === "anchor" ? "ANCHOR" : "404"}] ${failure.target}`,
+      );
     }
   }
   const elapsed = ((Date.now() - startTime) / 1000).toFixed(3);
@@ -185,11 +151,7 @@ const reportSuccess = (scanned, startTime) => {
   console.log(`OK: Scanned ${scanned} links in ${elapsed} seconds.`);
 };
 
-export const runInternalCheck = ({
-  rootPath,
-  rootLabel,
-  skipPatterns = [],
-}) => {
+export const runInternalCheck = ({ rootPath, rootLabel }) => {
   const cache = new Map();
   const failures = [];
   let scanned = 0;
@@ -197,7 +159,7 @@ export const runInternalCheck = ({
   for (const file of collectHtmlFiles(rootPath)) {
     const source = showSource(file, rootPath, rootLabel);
     for (const link of parseFile(file, cache).links) {
-      if (isSkippable(link, "internal", skipPatterns)) continue;
+      if (isSkippable(link)) continue;
       const target = resolveInternal(link, file, rootPath);
       if (!target) continue;
       scanned++;
@@ -223,82 +185,10 @@ export const runInternalCheck = ({
   return { failures, scanned };
 };
 
-export const fetchOk = async (url, timeoutMs, fetchImpl = fetch) => {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    let res = await fetchImpl(url, {
-      method: "HEAD",
-      redirect: "follow",
-      signal: controller.signal,
-    });
-    if (res.status === 400 || res.status === 405) {
-      res = await fetchImpl(url, {
-        method: "GET",
-        redirect: "follow",
-        signal: controller.signal,
-      });
-    }
-    return res.status >= 200 && res.status < 400;
-  } catch {
-    return false;
-  } finally {
-    clearTimeout(timer);
-  }
-};
-
-export const runExternalCheck = async ({
-  rootPath,
-  rootLabel,
-  skipPatterns = [],
-  timeoutMs = DEFAULT_TIMEOUT_MS,
-  concurrency = DEFAULT_CONCURRENCY,
-  fetchImpl = fetch,
-}) => {
-  const cache = new Map();
-  const linksBySource = new Map();
-  const uniqueLinks = new Set();
-
-  for (const file of collectHtmlFiles(rootPath)) {
-    const source = showSource(file, rootPath, rootLabel);
-    for (const link of parseFile(file, cache).links) {
-      if (isSkippable(link, "external", skipPatterns)) continue;
-      const trimmed = link.trim();
-      uniqueLinks.add(trimmed);
-      if (!linksBySource.has(source)) linksBySource.set(source, new Set());
-      linksBySource.get(source).add(trimmed);
-    }
-  }
-
-  const queue = [...uniqueLinks];
-  const brokenLinks = new Set();
-  let index = 0;
-  let scanned = 0;
-  const worker = async () => {
-    while (index < queue.length) {
-      const link = queue[index++];
-      scanned++;
-      if (!(await fetchOk(link, timeoutMs, fetchImpl))) brokenLinks.add(link);
-    }
-  };
-  await Promise.all(Array.from({ length: concurrency }, worker));
-
-  const failures = [];
-  for (const [source, links] of linksBySource) {
-    for (const link of links) {
-      if (brokenLinks.has(link)) {
-        failures.push({ source, target: link, kind: "external" });
-      }
-    }
-  }
-
-  return { failures, scanned };
-};
-
 export const main = async (argv = process.argv, env = process.env) => {
   const startTime = Date.now();
   try {
-    const mode = parseMode(argv[2] ?? "internal");
+    parseMode(argv[2] ?? "internal");
     const rootInput = env.LINKCHECK_ROOT ?? DEFAULT_ROOT;
     const rootPath = path.resolve(rootInput);
     const rootLabel = rootInput.replace(/\\/g, "/");
@@ -309,29 +199,8 @@ export const main = async (argv = process.argv, env = process.env) => {
       );
     }
 
-    const skipPatterns = loadSkipPatterns(
-      env.LINKCHECK_SKIP_FILE ?? DEFAULT_SKIP_FILE,
-    );
-    console.log(`Scanning ${mode} links in ${rootLabel}`);
-
-    const result =
-      mode === "external"
-        ? await runExternalCheck({
-            rootPath,
-            rootLabel,
-            skipPatterns,
-            timeoutMs: parsePositiveInteger(
-              env.LINKCHECK_TIMEOUT,
-              DEFAULT_TIMEOUT_MS,
-              "LINKCHECK_TIMEOUT",
-            ),
-            concurrency: parsePositiveInteger(
-              env.LINKCHECK_CONCURRENCY,
-              DEFAULT_CONCURRENCY,
-              "LINKCHECK_CONCURRENCY",
-            ),
-          })
-        : runInternalCheck({ rootPath, rootLabel, skipPatterns });
+    console.log(`Scanning internal links in ${rootLabel}`);
+    const result = runInternalCheck({ rootPath, rootLabel });
 
     if (result.failures.length) {
       reportFailures(result.failures, result.scanned, startTime);

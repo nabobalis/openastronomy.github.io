@@ -100,9 +100,9 @@ Run the short combined source check:
 npm run check
 ```
 
-## Link Checks
+## Link Check
 
-Build the site before running link checks:
+Build the site before running the link check:
 
 ```shell
 npm run build
@@ -111,31 +111,23 @@ npm run build
 Check internal links and anchors:
 
 ```shell
-npm run linkcheck:internal
+npm run linkcheck
 ```
 
-Check external links:
+The link checker intentionally ignores external URLs. It only validates local
+generated files and fragment anchors, which keeps CI deterministic and avoids
+checking third-party services such as fonts, social sites, and redirect-heavy
+documentation hosts.
 
-```shell
-npm run linkcheck:external
-```
-
-Skip patterns are read from `linkcheck.skip.txt` by default. Add one regular
-expression per line.
-
-Supported environment variables:
+Supported environment variable:
 
 - `LINKCHECK_ROOT=...` points at a different build folder.
-- `LINKCHECK_SKIP_FILE=...` points at a different skip-pattern file.
-- `LINKCHECK_TIMEOUT=...` sets the external request timeout in milliseconds.
-- `LINKCHECK_CONCURRENCY=...` sets the number of parallel external checks
-  (default: 20).
 
 ## CI
 
 GitHub Actions (`.github/workflows/ci.yml`) is the merge quality gate. It runs
 formatting, source lint, Markdown lint, Astro checks, unit tests, a production
-build, and internal/external link checks.
+build, and an internal link/anchor check.
 
 CircleCI (`.circleci/config.yml`) builds the site and publishes the `html/`
 artifact for pull-request preview.

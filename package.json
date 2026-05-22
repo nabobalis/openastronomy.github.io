@@ -19,8 +19,8 @@
     "format:check": "prettier . --check",
     "astro:check": "astro check",
     "check": "npm run lint && npm run astro:check",
-    "linkcheck:internal": "node scripts/linkcheck.mjs internal",
-    "linkcheck:external": "node scripts/linkcheck.mjs external"
+    "linkcheck": "node scripts/linkcheck.mjs",
+    "linkcheck:internal": "node scripts/linkcheck.mjs internal"
   },
   "dependencies": {
     "astro": "^5.16.15"

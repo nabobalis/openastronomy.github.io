@@ -108,16 +108,16 @@ When updating the Node.js version or build command, update both CI configs.
 
 GitHub Actions (`.github/workflows/ci.yml`) runs on every push and pull request. Jobs run in parallel where possible:
 
-| Job              | What it checks                                               |
-| ---------------- | ------------------------------------------------------------ |
-| `format`         | Prettier format                                              |
-| `lint`           | ESLint (warnings treated as errors) + Markdownlint           |
-| `typecheck`      | Astro type/content checks (`astro:check`)                    |
-| `test`           | Unit tests (`npm test`)                                      |
-| `build`          | Production build; output uploaded as a shared artifact       |
-| `linkcheck` (×2) | Internal and external links, using the shared build artifact |
+| Job         | What it checks                                              |
+| ----------- | ----------------------------------------------------------- |
+| `format`    | Prettier format                                             |
+| `lint`      | ESLint (warnings treated as errors) + Markdownlint          |
+| `typecheck` | Astro type/content checks (`astro:check`)                   |
+| `test`      | Unit tests (`npm test`)                                     |
+| `build`     | Production build; output uploaded as a shared artifact      |
+| `linkcheck` | Internal links and anchors, using the shared build artifact |
 
-All jobs must pass before merging. The `linkcheck` jobs wait for `build` and all quality jobs.
+All jobs must pass before merging. The `linkcheck` job waits for `build` and all quality jobs.
 
 ---
 

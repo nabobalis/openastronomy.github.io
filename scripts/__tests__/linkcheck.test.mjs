@@ -4,11 +4,8 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   extractLinksAndAnchors,
-  fetchOk,
   parseMode,
-  parsePositiveInteger,
   resolveInternal,
-  runExternalCheck,
   runInternalCheck,
 } from "../linkcheck.mjs";
 
@@ -33,24 +30,13 @@ afterEach(() => {
 });
 
 describe("parseMode", () => {
-  it("accepts known modes", () => {
+  it("accepts the internal mode", () => {
     expect(parseMode("internal")).toBe("internal");
-    expect(parseMode("external")).toBe("external");
   });
 
-  it("rejects unknown modes", () => {
-    expect(() => parseMode("all")).toThrow("Unknown linkcheck mode");
-  });
-});
-
-describe("parsePositiveInteger", () => {
-  it("uses the fallback when unset", () => {
-    expect(parsePositiveInteger(undefined, 20, "TEST")).toBe(20);
-  });
-
-  it("rejects non-positive values", () => {
-    expect(() => parsePositiveInteger("0", 20, "TEST")).toThrow(
-      "positive integer",
+  it("rejects external mode", () => {
+    expect(() => parseMode("external")).toThrow(
+      "External link checking has been removed",
     );
   });
 });
@@ -109,61 +95,6 @@ describe("runInternalCheck", () => {
         source: "html/",
         target: "html/page/#missing",
         kind: "anchor",
-      },
-    ]);
-  });
-});
-
-describe("fetchOk", () => {
-  it("falls back to GET when HEAD is not allowed", async () => {
-    const calls = [];
-    const fetchImpl = async (_url, options) => {
-      calls.push(options.method);
-      return { status: options.method === "HEAD" ? 405 : 200 };
-    };
-
-    await expect(fetchOk("https://example.com", 1000, fetchImpl)).resolves.toBe(
-      true,
-    );
-    expect(calls).toEqual(["HEAD", "GET"]);
-  });
-});
-
-describe("runExternalCheck", () => {
-  it("checks each unique external link once", async () => {
-    const root = makeRoot();
-    writeHtml(
-      root,
-      "index.html",
-      '<a href="https://ok.example">OK</a><a href="https://bad.example">Bad</a>',
-    );
-    writeHtml(root, "page/index.html", '<a href="https://bad.example">Bad</a>');
-    const seen = [];
-    const fetchImpl = async (url) => {
-      seen.push(url);
-      return { status: url.includes("bad") ? 500 : 200 };
-    };
-
-    const result = await runExternalCheck({
-      rootPath: root,
-      rootLabel: "html",
-      concurrency: 1,
-      timeoutMs: 1000,
-      fetchImpl,
-    });
-
-    expect(seen).toEqual(["https://ok.example", "https://bad.example"]);
-    expect(result.scanned).toBe(2);
-    expect(result.failures).toEqual([
-      {
-        source: "html/",
-        target: "https://bad.example",
-        kind: "external",
-      },
-      {
-        source: "html/page/",
-        target: "https://bad.example",
-        kind: "external",
       },
     ]);
   });
