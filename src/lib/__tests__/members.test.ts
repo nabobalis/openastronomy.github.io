@@ -25,7 +25,7 @@ describe("buildMemberLinks", () => {
       ...base,
       repositories: { bitbucket: "team/repo" },
     });
-    expect(link.href).toBe("https://bitbucket.com/team/repo");
+    expect(link.href).toBe("https://bitbucket.org/team/repo");
     expect(link.iconName).toBe("bitbucket");
   });
 

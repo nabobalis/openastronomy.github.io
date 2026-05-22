@@ -29,7 +29,7 @@ export type MemberLink = {
 
 const repoUrl: Record<string, (v: string) => string> = {
   github: (v) => `https://github.com/${v}`,
-  bitbucket: (v) => `https://bitbucket.com/${v}`,
+  bitbucket: (v) => `https://bitbucket.org/${v}`,
   sourceforge: (v) => `https://sourceforge.net/projects/${v}`,
 };
 

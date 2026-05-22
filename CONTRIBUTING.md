@@ -110,6 +110,15 @@ Add a brief inline comment when test setup is non-obvious (e.g. a mock helper or
 
 ## CI
 
+This project uses **two CI systems intentionally** — they serve different purposes:
+
+- **GitHub Actions** (`.github/workflows/ci.yml`) — quality gate for every push and pull request.
+- **CircleCI** (`.circleci/config.yml`) — generates a preview URL for pull requests via the CircleCI artifact viewer. It runs `npm run build` and patches asset paths so the built HTML is viewable at the CircleCI artifact URL. It does not run tests or linting.
+
+When updating the Node.js version or build command, update both CI configs.
+
+### GitHub Actions jobs
+
 GitHub Actions (`.github/workflows/ci.yml`) runs on every push and pull request. Jobs run in parallel where possible:
 
 | Job              | What it checks                                               |

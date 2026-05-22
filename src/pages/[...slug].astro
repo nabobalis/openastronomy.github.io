@@ -47,7 +47,7 @@ const projectMeta = projectInfo
         <Content />
       </ProjectBody>
     </BaseLayout>
-  ) : page.id === "gsoc" ? (
+  ) : page.data.layout === "page" ? (
     <PageLayout title={pageTitle} description={description}>
       <Content />
     </PageLayout>

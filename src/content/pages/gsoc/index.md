@@ -1,5 +1,6 @@
 ---
 title: Google Summer of Code
+layout: page
 ---
 
 ## New to Google Summer of Code (GSoC)?

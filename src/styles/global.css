@@ -12,11 +12,12 @@
 }
 
 body {
-  font-family: "Open Sans", Helvetica, Arial, sans-serif;
+  font-family: "Fira Sans", Helvetica, Arial, sans-serif;
   font-size: 1.05rem;
   color: var(--color-text);
   margin: 0;
   padding-bottom: 0;
+  background-image: var(--page-bg);
   background-size: 100%;
   background-repeat: no-repeat;
 }
@@ -49,7 +50,7 @@ h4,
 h5,
 h6 {
   color: var(--color-text);
-  font-family: "Montserrat", "Helvetica", "Arial";
+  font-family: "Fira Sans", "Helvetica", "Arial";
 }
 
 h1,
@@ -399,6 +400,14 @@ dialog.gsoc-project-detail::backdrop {
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 16px;
   margin-top: 16px;
+}
+
+.rounded-circle {
+  border-radius: 50%;
+}
+
+.text-center {
+  text-align: center;
 }
 
 @media (max-width: 900px) {
