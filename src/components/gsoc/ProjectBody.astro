@@ -6,15 +6,11 @@
  * [...slug].astro for direct project URLs.
  */
 import type { ProjectMeta } from "../../lib/gsoc.ts";
+import { getProjectDetailRows } from "../../lib/gsoc.ts";
 
 type Props = { project: ProjectMeta; showOpenLink?: boolean };
 const { project, showOpenLink = true } = Astro.props as Props;
-
-const rows = [
-  { label: "Initiatives", values: project.initiatives },
-  { label: "Project size", values: project.projectSize },
-  { label: "Tags", values: project.tags },
-].filter((r) => r.values.length > 0);
+const rows = getProjectDetailRows(project);
 ---
 
 {

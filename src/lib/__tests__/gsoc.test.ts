@@ -2,6 +2,8 @@ import { describe, it, expect } from "vitest";
 import {
   normalizeArray,
   formatMemberLink,
+  getProjectCardRows,
+  getProjectDetailRows,
   parseProjectId,
   buildProjectMeta,
 } from "../gsoc.ts";
@@ -45,11 +47,23 @@ const memberLookup = {
 };
 const fakeFromSiteRoot = (pathname: string, target: string) =>
   `${pathname}${target}`;
+const pathInfo = { year: "2026", suborg: "sunpy", fileSlug: "radiospectra" };
 
 describe("formatMemberLink", () => {
   it("returns the member name and a slugified anchor href for a known key", () => {
     const result = formatMemberLink(
       "sunpy",
+      memberLookup,
+      "/gsoc/2025/",
+      fakeFromSiteRoot,
+    );
+    expect(result.label).toBe("SunPy");
+    expect(result.href).toContain("#sunpy");
+  });
+
+  it("matches member keys case-insensitively", () => {
+    const result = formatMemberLink(
+      "SunPy",
       memberLookup,
       "/gsoc/2025/",
       fakeFromSiteRoot,
@@ -99,8 +113,6 @@ describe("parseProjectId", () => {
 });
 
 describe("buildProjectMeta", () => {
-  const pathInfo = { year: "2026", suborg: "sunpy", fileSlug: "radiospectra" };
-
   it("uses the `name` field when set", () => {
     const meta = buildProjectMeta(
       { name: "Radio Spectra" },
@@ -159,5 +171,59 @@ describe("buildProjectMeta", () => {
       { label: "unknown", href: null },
     ]);
     expect(meta.issues).toEqual(["https://github.com/x/y/issues/1"]);
+  });
+
+  it("adds difficulty when present", () => {
+    const meta = buildProjectMeta(
+      { difficulty: "medium" },
+      pathInfo,
+      memberLookup,
+      "/",
+      fakeFromSiteRoot,
+    );
+    expect(meta.difficulty).toBe("medium");
+  });
+});
+
+describe("getProjectCardRows", () => {
+  it("returns only filled summary rows", () => {
+    const meta = buildProjectMeta(
+      {
+        mentors: ["alice"],
+        difficulty: "medium",
+        tags: [],
+      },
+      pathInfo,
+      memberLookup,
+      "/",
+      fakeFromSiteRoot,
+    );
+    expect(getProjectCardRows(meta)).toEqual([
+      { label: "Mentors", values: ["alice"] },
+      { label: "Difficulty", values: ["medium"] },
+    ]);
+  });
+});
+
+describe("getProjectDetailRows", () => {
+  it("uses the shared detail field ordering", () => {
+    const meta = buildProjectMeta(
+      {
+        difficulty: "high",
+        initiatives: ["GSOC"],
+        project_size: ["350 h"],
+        tags: ["python"],
+      },
+      pathInfo,
+      memberLookup,
+      "/",
+      fakeFromSiteRoot,
+    );
+    expect(getProjectDetailRows(meta)).toEqual([
+      { label: "Difficulty", values: ["high"] },
+      { label: "Initiatives", values: ["GSOC"] },
+      { label: "Project size", values: ["350 h"] },
+      { label: "Tags", values: ["python"] },
+    ]);
   });
 });

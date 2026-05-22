@@ -1,11 +1,4 @@
 ---
-/*
- * PostLayout - wraps a blog post with its title, date, author, and meta line.
- *
- * Formats the date with Intl.DateTimeFormat and joins non-empty meta parts
- * (date, author, meta) with " • " separators into a single <p class="post-meta">.
- * The post body is rendered via <slot />.
- */
 import BaseLayout from "./BaseLayout.astro";
 
 type Props = {

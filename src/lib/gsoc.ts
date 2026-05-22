@@ -19,6 +19,7 @@ export type ProjectMeta = {
   anchor: string;
   href: string;
   desc: string;
+  difficulty: string;
   requirements: string[];
   mentors: string[];
   initiatives: string[];
@@ -30,6 +31,11 @@ export type ProjectMeta = {
 
 /** ProjectMeta plus the rendered markdown Content component. */
 export type GsocProject = ProjectMeta & { Content: AstroComponentFactory };
+
+export type ProjectMetadataRow = {
+  label: string;
+  values: string[];
+};
 
 /**
  * Coerces a raw frontmatter value to a clean array of non-empty strings.
@@ -50,10 +56,13 @@ export const normalizeArray = (value: unknown): string[] => {
     });
 };
 
+const memberLookupKeys = (memberLookup: Record<string, { name?: string }>) =>
+  new Map(Object.keys(memberLookup).map((key) => [key.toLowerCase(), key]));
+
 /**
  * Resolves a `collaborating_projects` key to a display label + optional
- * relative href into `/members/#<slug>`. Returns `{ label: key, href: null }`
- * when the key is unknown.
+ * relative href into `/members/#<slug>`. Matching is case-insensitive so
+ * legacy values such as `SunPy` and `juliaAstro` still resolve.
  */
 export const formatMemberLink = (
   key: string,
@@ -61,7 +70,9 @@ export const formatMemberLink = (
   pagePath: string,
   fromSiteRoot: (pathname: string, targetPath: string) => string,
 ): MemberLink => {
-  const member = memberLookup[key];
+  const memberKey =
+    memberLookupKeys(memberLookup).get(key.toLowerCase()) ?? key;
+  const member = memberLookup[memberKey];
   if (member?.name) {
     return {
       label: member.name,
@@ -70,6 +81,35 @@ export const formatMemberLink = (
   }
   return { label: key, href: null };
 };
+
+const row = (label: string, values: string[]): ProjectMetadataRow => ({
+  label,
+  values,
+});
+
+const filledRows = (rows: ProjectMetadataRow[]) =>
+  rows.filter((item) => item.values.length > 0);
+
+export const getProjectCardRows = (
+  project: ProjectMeta,
+): ProjectMetadataRow[] =>
+  filledRows([
+    row("Mentors", project.mentors),
+    row("Difficulty", project.difficulty ? [project.difficulty] : []),
+    row("Initiatives", project.initiatives),
+    row("Project size", project.projectSize),
+    row("Tags", project.tags),
+  ]);
+
+export const getProjectDetailRows = (
+  project: ProjectMeta,
+): ProjectMetadataRow[] =>
+  filledRows([
+    row("Difficulty", project.difficulty ? [project.difficulty] : []),
+    row("Initiatives", project.initiatives),
+    row("Project size", project.projectSize),
+    row("Tags", project.tags),
+  ]);
 
 /**
  * Returns `{ year, suborg, fileSlug }` when an entry id looks like
@@ -106,6 +146,7 @@ export const buildProjectMeta = (
       `/gsoc/${pathInfo.year}/${pathInfo.suborg}/${pathInfo.fileSlug}/`,
     ),
     desc: typeof data.desc === "string" ? data.desc : "",
+    difficulty: normalizeArray(data.difficulty)[0] ?? "",
     requirements: normalizeArray(data.requirements),
     mentors: normalizeArray(data.mentors),
     initiatives: normalizeArray(data.initiatives),

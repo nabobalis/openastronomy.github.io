@@ -44,26 +44,13 @@ Internal helpers (not exported) should have at least a brief inline comment if t
 
 ### `src/components/` and `src/layouts/` (`.astro` files)
 
-Add a block comment at the top of the frontmatter section explaining:
-
-1. What the component renders
-2. Any non-obvious prop relationships or assumptions
-
-```astro
----
-/*
- * ProjectCard - renders a single GSoC project summary button.
- * Clicking opens the matching ProjectDetail panel via the shared detailId.
- * Must be paired with a <ProjectDetail id={detailId} … /> in the same page.
- */
----
-```
-
-Short, self-evident page components (e.g. a page with only a title and a list) are exempt if the frontmatter is trivially readable.
+Prefer self-explanatory component names, prop names, and helper functions over file-level comments.
+Add a short comment only when the component has a non-obvious contract, security assumption, or cross-component relationship.
 
 ### `scripts/` (`.mjs` files)
 
-Every top-level function must have a JSDoc block. The module itself should have a `@fileoverview` comment at the top.
+Scripts should expose testable helpers where practical.
+Use comments for non-obvious parsing or process behavior, not for restating function names.
 
 ### Tests (`src/lib/__tests__/`)
 

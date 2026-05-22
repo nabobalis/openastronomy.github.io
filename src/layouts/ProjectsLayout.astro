@@ -1,10 +1,4 @@
 ---
-/**
- * Layout for GSoC season pages (e.g. /gsoc/2025/).
- *
- * Loads all project entries for the requested season from the `pages`
- * collection, then renders Projects + Mentors + Admins sections.
- */
 import { getCollection, render, type CollectionEntry } from "astro:content";
 import BaseLayout from "./BaseLayout.astro";
 import ProjectCard from "../components/gsoc/ProjectCard.astro";
@@ -71,54 +65,43 @@ const sections = [
 
 <BaseLayout title={pageTitle}>
   <div class="projects">
-    <div class="page-content">
-      <div class="container">
-        <nav class="gsoc-tabs">
-          {sections.map((s) => <a href={`#${s.id}`}>{s.label}</a>)}
-        </nav>
+    <nav class="gsoc-tabs">
+      {sections.map((s) => <a href={`#${s.id}`}>{s.label}</a>)}
+    </nav>
+
+    <section id="projects">
+      <h2>
+        <a class="gsoc-section-link" href="#projects">{sections[0].heading}</a>
+      </h2>
+      {projects.length === 0 ? <p>No projects listed yet.</p> : null}
+      <div class="gsoc-projects-grid">
+        {projects.map((project) => <ProjectCard project={project} />)}
       </div>
+      {projects.map((project) => <ProjectDetail project={project} />)}
+    </section>
 
-      <section id="projects" class="container">
-        <h2>
-          <a class="gsoc-section-link" href="#projects">{sections[0].heading}</a
-          >
-        </h2>
-        {projects.length === 0 ? <p>No projects listed yet.</p> : null}
-        <div class="gsoc-projects-grid">
-          {
-            projects.map((project) => (
-              <>
-                <ProjectCard project={project} />
-                <ProjectDetail project={project} />
-              </>
-            ))
-          }
-        </div>
-      </section>
-
-      <PeopleSection
-        id="mentors"
-        heading={sections[1].heading}
-        intro={`We are the mentors for OpenAstronomy in GSoC ${seasonKey}.`}
-        handles={mentors}
-      />
-      <PeopleSection
-        id="admins"
-        heading={sections[2].heading}
-        intro="We are the admins for OpenAstronomy."
-        handles={adminHandles}
-      />
-    </div>
+    <PeopleSection
+      id="mentors"
+      heading={sections[1].heading}
+      intro={`We are the mentors for OpenAstronomy in GSoC ${seasonKey}.`}
+      handles={mentors}
+    />
+    <PeopleSection
+      id="admins"
+      heading={sections[2].heading}
+      intro="We are the admins for OpenAstronomy."
+      handles={adminHandles}
+    />
   </div>
 </BaseLayout>
 
 <script>
   document
-    .querySelectorAll<HTMLButtonElement>(".gsoc-project-card[data-detail]")
-    .forEach((card) => {
-      const detailId = card.dataset.detail;
+    .querySelectorAll<HTMLButtonElement>(".gsoc-project-card-open[data-detail]")
+    .forEach((button) => {
+      const detailId = button.dataset.detail;
       if (!detailId) return;
-      card.addEventListener("click", () => {
+      button.addEventListener("click", () => {
         const dialog = document.getElementById(detailId);
         if (dialog instanceof HTMLDialogElement) dialog.showModal();
       });

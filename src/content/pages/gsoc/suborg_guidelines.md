@@ -45,7 +45,7 @@ Besides these deadlines, as a sub-org admin, you will have to keep track of all 
 Normally organizations provide a list of ideas that can be done by a contributor in approximately three months (working full-time).
 Take a look at what [Google says on how to define a project](https://google.github.io/gsocguides/mentor/defining-a-project-ideas-list), then look at [other ideas OpenAstronomy's members have proposed this or previous years.](../#current-projects).
 
-To add your own, you will have to create a pull-request to [our repository][OA repository] following the [template](../_project_template/).
+To add your own, you will have to create a pull-request to [our repository][OA repository] following the [project template].
 Take a look at [how others have done it before](https://github.com/OpenAstronomy/openastronomy.github.io/pull/182).
 The admins and other members will review your ideas and provide feedback.
 Once done, they will be merged and displayed on our website.
@@ -150,6 +150,7 @@ If they are not followed the administrators will fail the contributors.
 
 [OA repository]: https://github.com/OpenAstronomy/openastronomy.github.io
 [contributor guidelines]: ../contributor_guidelines/
+[project template]: https://github.com/OpenAstronomy/openastronomy.github.io/blob/main/src/content/pages/gsoc/_project_template.md
 [Google's mentor guide]: https://google.github.io/gsocguides/mentor/
 [GSOC]: https://summerofcode.withgoogle.com/
 [members PR]: https://github.com/OpenAstronomy/openastronomy.github.io/blob/master/_data/members.yaml

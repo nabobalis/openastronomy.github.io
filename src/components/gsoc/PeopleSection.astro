@@ -1,9 +1,4 @@
 ---
-/**
- * Renders a people grid section (mentors or admins) for a GSoC season page.
- * Each person is shown with their GitHub avatar and a link to their profile.
- */
-
 type Props = {
   id: string;
   heading: string;
@@ -14,7 +9,7 @@ type Props = {
 const { id, heading, intro, handles } = Astro.props;
 ---
 
-<section {id} class="container">
+<section {id}>
   <h2>
     <a class="gsoc-section-link" href={`#${id}`}>{heading}</a>
   </h2>

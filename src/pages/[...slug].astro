@@ -10,10 +10,14 @@ import { buildProjectMeta, parseProjectId } from "../lib/gsoc.ts";
 
 export async function getStaticPaths() {
   const pages = await getCollection("pages");
-  return pages.map((page: CollectionEntry<"pages">) => ({
-    params: { slug: page.id === "index" ? undefined : page.id },
-    props: { page },
-  }));
+  return pages
+    .filter(
+      (page: CollectionEntry<"pages">) => page.id !== "gsoc/_project_template",
+    )
+    .map((page: CollectionEntry<"pages">) => ({
+      params: { slug: page.id === "index" ? undefined : page.id },
+      props: { page },
+    }));
 }
 
 type Props = { page: CollectionEntry<"pages"> };
