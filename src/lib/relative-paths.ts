@@ -18,11 +18,8 @@ const PROTOCOL_RE = /^[a-zA-Z][a-zA-Z\d+\-.]*:/;
  *   `/`           → `./`
  *   `/members/`   → `../`
  *   `/gsoc/2025/` → `../../`
- *
- * @param {string} [pathname="/"] - The current page's URL pathname.
- * @returns {string} A relative path prefix ending with `/`.
  */
-export const getRelativeRoot = (pathname = "/") => {
+export const getRelativeRoot = (pathname: string = "/"): string => {
   // Strip query string and hash before counting path segments.
   const cleanPath = String(pathname).split("?")[0].split("#")[0];
   const depth = cleanPath.split("/").filter(Boolean).length;
@@ -31,12 +28,9 @@ export const getRelativeRoot = (pathname = "/") => {
 
 /**
  * Converts an absolute site-root path to a path relative to the current page.
- *
- * @param {string} pathname - The current page's URL pathname.
- * @param {string} targetPath - Absolute path from the site root (leading `/` optional).
- * @returns {string} A relative URL string.
+ * `targetPath` is an absolute path from the site root (leading `/` optional).
  */
-export const fromSiteRoot = (pathname, targetPath) => {
+export const fromSiteRoot = (pathname: string, targetPath: string): string => {
   const relativeRoot = getRelativeRoot(pathname);
   const normalizedTarget = String(targetPath ?? "").replace(/^\/+/, "");
   return normalizedTarget ? `${relativeRoot}${normalizedTarget}` : relativeRoot;
@@ -50,12 +44,8 @@ export const fromSiteRoot = (pathname, targetPath) => {
  * - Absolute-path links (starting with `/`) are converted to relative paths via
  *   {@link fromSiteRoot} so they work regardless of deployment base path.
  * - Relative hrefs are returned as-is.
- *
- * @param {string} pathname - The current page's URL pathname.
- * @param {string} href - The raw href value to resolve.
- * @returns {string} The resolved href.
  */
-export const localizeHref = (pathname, href) => {
+export const localizeHref = (pathname: string, href: string): string => {
   const value = String(href ?? "");
   if (!value) return value;
   if (value.startsWith("#")) return value;
@@ -66,11 +56,8 @@ export const localizeHref = (pathname, href) => {
 
 /**
  * Lowercase kebab-case slug for use as HTML id or URL path segment.
- *
- * @param {string} value
- * @returns {string}
  */
-export const slugify = (value) =>
+export const slugify = (value: string): string =>
   String(value)
     .toLowerCase()
     .trim()

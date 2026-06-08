@@ -4,6 +4,7 @@ import PageLayout from "../../layouts/PageLayout.astro";
 import { localizeHref } from "../../lib/relative-paths.js";
 import { resolveProjectDisplay } from "../../lib/member-logos";
 import { getBlogUrl, loadUniverseConfig } from "../../lib/universe";
+import "../../styles/universe.css";
 
 const pagePath = Astro.url.pathname;
 const { seasons, availableYears } = loadUniverseConfig();
@@ -23,7 +24,7 @@ const projectArchiveHref = (year: number) =>
       matching Google Summer of Code pages in this site.
     </p>
     <p>
-      <a href={localizeHref(pagePath, "/Universe_OA/")}>
+      <a href={localizeHref(pagePath, "/universe-oa/")}>
         Current contributor blogs
       </a>
     </p>

@@ -63,9 +63,7 @@ Individuals from any background from anywhere around the world are encouraged to
 > of 2016 I applied to the GSoC to work on PSF photometry for
 > [photutils](https://www.github.com/astropy/photutils) and got selected! :)
 > One of the best parts of the GSoC was the amount of learning I got by being
-> mentored by experts in software development and astronomy! If you want to know
-> more about my journey during the GSoC 2016 see my
-> [blog posts](https://openastronomy.org/Universe_OA/authors/ze-vinicius/).
+> mentored by experts in software development and astronomy!
 
 [Zé Vinícius][mirca], EE undergraduate student, GSoC 2016
 

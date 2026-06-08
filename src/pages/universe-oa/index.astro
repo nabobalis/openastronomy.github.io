@@ -1,9 +1,10 @@
 ---
 import { Image } from "astro:assets";
-import PageLayout from "../layouts/PageLayout.astro";
-import { localizeHref } from "../lib/relative-paths.js";
-import { resolveProjectDisplay } from "../lib/member-logos";
-import { buildUniverseSeason, type UniverseStudent } from "../lib/universe";
+import PageLayout from "../../layouts/PageLayout.astro";
+import { localizeHref } from "../../lib/relative-paths.js";
+import { resolveProjectDisplay } from "../../lib/member-logos";
+import { buildUniverseSeason, type UniverseStudent } from "../../lib/universe";
+import "../../styles/universe.css";
 
 const season = await buildUniverseSeason();
 const pagePath = Astro.url.pathname;
@@ -62,7 +63,7 @@ const feedErrorMessage = (student: UniverseStudent) =>
       Last checked {timeFormatter.format(season.generatedAt)}
     </p>
     <p>
-      <a href={localizeHref(pagePath, "/Universe_OA/archive/")}>
+      <a href={localizeHref(pagePath, "/universe-oa/archive/")}>
         View previous seasons
       </a>
     </p>

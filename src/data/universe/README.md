@@ -1,6 +1,6 @@
 # Contributor Blog Feeds
 
-This directory configures the `/Universe_OA/` contributor blog page.
+This directory configures the `/universe-oa/` contributor blog page.
 
 The old `Universe_OA` repository generated a separate Nikola site. In this
 Astro site, feed checks run during the normal static build instead. The built
@@ -74,7 +74,7 @@ rebuilt and refreshed regularly.
 
 ## Archive
 
-`/Universe_OA/` shows the current configured season.
+`/universe-oa/` shows the current configured season.
 
-`/Universe_OA/archive/` lists older seasons and links to the matching GSoC
+`/universe-oa/archive/` lists older seasons and links to the matching GSoC
 project archive pages.

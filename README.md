@@ -142,7 +142,7 @@ artifact for pull-request preview.
 - `src/content/` contains posts and Markdown page content, including GSoC pages
   and projects.
 - `src/data/` contains JSON data used by pages and components.
-  `src/data/universe/` configures the `/Universe_OA/` contributor blog feed
+  `src/data/universe/` configures the `/universe-oa/` contributor blog feed
   checker and archive.
 - `src/layouts/` contains page and post layout components.
 - `src/lib/` contains reusable JavaScript and TypeScript helpers plus unit

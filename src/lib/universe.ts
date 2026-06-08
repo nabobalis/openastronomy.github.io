@@ -256,7 +256,7 @@ export function validateUniverseConfig(
 
   if (errors.length > 0) {
     throw new Error(
-      `Invalid Universe_OA season data:\n- ${errors.join("\n- ")}`,
+      `Invalid universe-oa season data:\n- ${errors.join("\n- ")}`,
     );
   }
 }
