@@ -11,7 +11,10 @@ const navLinks = [
     title: page.title,
     href: localizeHref(pagePath, page.href),
   })),
-  ...Object.entries(site.nav_links).map(([title, href]) => ({ title, href })),
+  ...Object.entries(site.nav_links).map(([title, href]) => ({
+    title,
+    href: localizeHref(pagePath, href),
+  })),
 ];
 ---
 

@@ -1,7 +1,7 @@
 ---
-layout: post
 title: "Google Summer of Code, open proposals and claims of plagiarism"
 date: 2026-06-01
+summary: "A summary of the roll out of the new system for GSoC 2026."
 ---
 
 This is our 10th anniversary participating in [GSoC](https://summerofcode.withgoogle.com/) as Open Astronomy,

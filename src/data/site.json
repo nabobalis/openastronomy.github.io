@@ -3,7 +3,7 @@
   "description": "Where all about the combined force of different open source projects in astronomy and astrophysics takes place.",
   "url": "https://openastronomy.org",
   "nav_links": {
-    "Contributor Blogs": "http://openastronomy.org/Universe_OA"
+    "Contributor Blogs": "/Universe_OA/"
   },
   "page_links": [
     { "title": "Members", "href": "/members/" },

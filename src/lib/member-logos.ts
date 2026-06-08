@@ -5,6 +5,7 @@
  * avoids duplicating the map construction for every member on the page.
  */
 import type { ImageMetadata } from "astro";
+import { members } from "./members";
 
 const logoModules = import.meta.glob<{ default: ImageMetadata }>(
   "../assets/members/*.{png,jpg,jpeg,webp,avif}",
@@ -21,3 +22,20 @@ export const memberLogoMap = Object.fromEntries(
     mod.default,
   ]),
 ) as Record<string, ImageMetadata>;
+
+/**
+ * Resolves a project key (case-insensitive) to its display name and logo,
+ * falling back to the raw key with no logo for non-member projects.
+ */
+export const resolveProjectDisplay = (
+  project: string,
+): { name: string; logo: ImageMetadata | null } => {
+  const key = Object.keys(members).find(
+    (memberKey) => memberKey.toLowerCase() === project.toLowerCase(),
+  );
+  const details = key ? members[key] : null;
+  return {
+    name: details?.name ?? project,
+    logo: details ? memberLogoMap[details.logo] : null,
+  };
+};
