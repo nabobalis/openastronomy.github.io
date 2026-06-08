@@ -38,6 +38,14 @@ const formatRange = (start: Date, end: Date) =>
 const statusLabel = (status: string) =>
   status.charAt(0).toUpperCase() + status.slice(1);
 
+// Shape-coded status so it does not rely on colour alone.
+const statusGlyph: Record<string, string> = {
+  complete: "✓",
+  missing: "✕",
+  optional: "○",
+  pending: "·",
+};
+
 const feedLabel = (student: UniverseStudent) => {
   if (student.feedStatus === "ok") return "Feed available";
   if (student.feedStatus === "empty") return "No posts found";
@@ -79,7 +87,7 @@ const feedErrorMessage = (student: UniverseStudent) =>
           <th scope="col">Contributor</th>
           <th scope="col">Project</th>
           <th scope="col">Latest post</th>
-          <th scope="col">Posting windows</th>
+          <th scope="col">Blog updates</th>
         </tr>
       </thead>
       <tbody>
@@ -141,7 +149,9 @@ const feedErrorMessage = (student: UniverseStudent) =>
                         title={`${formatRange(window.start, window.end)}: ${statusLabel(window.status)}`}
                         aria-label={`Window ${index + 1}, ${formatRange(window.start, window.end)}: ${statusLabel(window.status)}`}
                       >
-                        {index + 1}
+                        <span aria-hidden="true">
+                          {statusGlyph[window.status] ?? index + 1}
+                        </span>
                       </span>
                     ))}
                   </div>

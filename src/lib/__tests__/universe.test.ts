@@ -55,6 +55,27 @@ describe("parseFeedXml", () => {
     expect(posts[0].url).toBe("https://example.com/atom-post");
   });
 
+  it("drops posts whose link is not an http(s) URL", () => {
+    const posts = parseFeedXml(`
+      <rss>
+        <channel>
+          <item>
+            <title>Malicious post</title>
+            <link>javascript:alert(1)</link>
+            <pubDate>Mon, 01 Jun 2026 00:00:00 GMT</pubDate>
+          </item>
+          <item>
+            <title>Safe post</title>
+            <link>https://example.com/safe</link>
+            <pubDate>Mon, 08 Jun 2026 00:00:00 GMT</pubDate>
+          </item>
+        </channel>
+      </rss>
+    `);
+
+    expect(posts.map((post) => post.url)).toEqual(["https://example.com/safe"]);
+  });
+
   it("keeps only GSoC-tagged Medium posts", () => {
     const posts = parseFeedXml(
       `

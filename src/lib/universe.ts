@@ -357,7 +357,7 @@ export const parseFeedXml = (xml: string, feedUrl = ""): UniverseFeedPost[] => {
 
       const publishedAt = itemDate(item);
       const url = pickLink(item.link ?? item.id);
-      if (!publishedAt || !url) return [];
+      if (!publishedAt || !url || !isHttpUrl(url)) return [];
 
       const title =
         textValue(item.title) ||
@@ -421,6 +421,7 @@ export const getBlogUrl = (
   posts: UniverseFeedPost[],
 ): string | null => {
   const sourceUrl = posts[0]?.url || feedUrl;
+  if (!isHttpUrl(sourceUrl)) return null;
   try {
     const url = new URL(sourceUrl);
     const parts = url.pathname.split("/").filter(Boolean);
