@@ -2,8 +2,8 @@
 // /news/ — lists all blog posts sorted by date, newest first.
 import PageLayout from "../layouts/PageLayout.astro";
 import { getCollection, type CollectionEntry } from "astro:content";
-import { getPostUrl, getPostDateParts } from "../lib/posts.js";
-import { localizeHref } from "../lib/relative-paths.js";
+import { getPostUrl, getPostDateParts } from "../lib/posts.ts";
+import { localizeHref } from "../lib/relative-paths.ts";
 
 type Post = CollectionEntry<"posts">;
 const posts = (await getCollection("posts")).sort(

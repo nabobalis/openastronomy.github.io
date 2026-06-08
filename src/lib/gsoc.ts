@@ -4,7 +4,7 @@
  * No Astro-runtime imports here so the helpers stay unit-testable.
  */
 
-import { slugify } from "./relative-paths.js";
+import { slugify } from "./relative-paths.ts";
 
 export type AstroComponentFactory = (...args: unknown[]) => unknown;
 

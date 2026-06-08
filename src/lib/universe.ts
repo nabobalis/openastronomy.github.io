@@ -1,7 +1,7 @@
 import { XMLParser } from "fast-xml-parser";
 import { parse as parseYaml } from "yaml";
 import universeYaml from "../data/universe/seasons.yml?raw";
-import { members } from "./members";
+import { members } from "./members.ts";
 
 type RawContributor = {
   name?: unknown;

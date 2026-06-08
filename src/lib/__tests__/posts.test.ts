@@ -1,7 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { getPostSlug, getPostDateParts, getPostUrl } from "../posts.js";
+import { getPostSlug, getPostDateParts, getPostUrl } from "../posts.ts";
 
-const makeEntry = (id, data = {}) => ({ id, data });
+const makeEntry = (id: string, data: { date?: string | Date } = {}) =>
+  ({ id, data }) as { id: string; data: { date: string | Date } };
 
 describe("getPostSlug", () => {
   it("strips the YYYY-MM-DD prefix from a dated filename", () => {

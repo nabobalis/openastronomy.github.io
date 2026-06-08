@@ -3,7 +3,7 @@ import {
   getRelativeRoot,
   fromSiteRoot,
   localizeHref,
-} from "../relative-paths.js";
+} from "../relative-paths.ts";
 
 describe("getRelativeRoot", () => {
   it("returns ./ for the root path", () => {

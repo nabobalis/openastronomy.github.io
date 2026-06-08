@@ -5,7 +5,7 @@
  * avoids duplicating the map construction for every member on the page.
  */
 import type { ImageMetadata } from "astro";
-import { members } from "./members";
+import { members } from "./members.ts";
 
 const logoModules = import.meta.glob<{ default: ImageMetadata }>(
   "../assets/members/*.{png,jpg,jpeg,webp,avif}",

@@ -5,7 +5,7 @@ import PageLayout from "../layouts/PageLayout.astro";
 import ProjectsLayout from "../layouts/ProjectsLayout.astro";
 import ProjectBody from "../components/gsoc/ProjectBody.astro";
 import { members } from "../lib/members.ts";
-import { fromSiteRoot } from "../lib/relative-paths.js";
+import { fromSiteRoot } from "../lib/relative-paths.ts";
 import { buildProjectMeta, parseProjectId } from "../lib/gsoc.ts";
 
 export async function getStaticPaths() {

@@ -2,7 +2,7 @@
 import { Image } from "astro:assets";
 import site from "../data/site.json";
 import icons from "../data/icons.json";
-import { fromSiteRoot, localizeHref } from "../lib/relative-paths.js";
+import { fromSiteRoot, localizeHref } from "../lib/relative-paths.ts";
 import logoWhite from "../assets/logoOA_white.png";
 
 const pagePath = Astro.url.pathname;
