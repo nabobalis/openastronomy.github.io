@@ -184,7 +184,9 @@ export function validateUniverseConfig(
 
   const seenYears = new Set<number>();
   const latestYear = Math.max(
-    ...seasons.map((s) => Number(textValue(asRecord(s)?.year))).filter(Number.isInteger),
+    ...seasons
+      .map((s) => Number(textValue(asRecord(s)?.year)))
+      .filter(Number.isInteger),
   );
 
   seasons.forEach((seasonValue, seasonIndex) => {
@@ -196,7 +198,8 @@ export function validateUniverseConfig(
     }
 
     const year = Number(textValue(season.year));
-    if (!Number.isInteger(year)) errors.push(`${label}: year must be an integer`);
+    if (!Number.isInteger(year))
+      errors.push(`${label}: year must be an integer`);
     else if (seenYears.has(year)) errors.push(`${label}: year must be unique`);
     else seenYears.add(year);
 
@@ -219,7 +222,8 @@ export function validateUniverseConfig(
         }
         const start = parseDateValue(window.start);
         const end = parseDateValue(window.end);
-        if (!start || !end) errors.push(`${wl}: start and end must be valid dates`);
+        if (!start || !end)
+          errors.push(`${wl}: start and end must be valid dates`);
         else if (end.getTime() <= start.getTime())
           errors.push(`${wl}: end must be after start`);
       });
@@ -245,12 +249,15 @@ export function validateUniverseConfig(
           `${cl}: project "${project}" must match src/data/members.json or an allowed external project`,
         );
       if (!feed) errors.push(`${cl}: feed is required`);
-      else if (!isHttpUrl(feed)) errors.push(`${cl}: feed must be an HTTP(S) URL`);
+      else if (!isHttpUrl(feed))
+        errors.push(`${cl}: feed must be an HTTP(S) URL`);
     });
   });
 
   if (errors.length > 0) {
-    throw new Error(`Invalid Universe_OA season data:\n- ${errors.join("\n- ")}`);
+    throw new Error(
+      `Invalid Universe_OA season data:\n- ${errors.join("\n- ")}`,
+    );
   }
 }
 
