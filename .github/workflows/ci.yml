@@ -15,8 +15,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # --- parallel quality checks ---
-
   format:
     name: Formatting
     runs-on: ubuntu-latest
@@ -71,8 +69,6 @@ jobs:
       - name: Run unit tests
         run: npm test
 
-  # --- build (runs after all quality checks pass) ---
-
   build:
     name: Build
     runs-on: ubuntu-latest
@@ -92,8 +88,6 @@ jobs:
           name: site
           path: html/
           retention-days: 1
-
-  # --- internal link check (shares the single build artifact) ---
 
   linkcheck:
     name: Link check

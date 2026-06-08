@@ -61,7 +61,6 @@ const stringListField = z
 const pages = defineCollection({
   loader: glob({ pattern: "**/*.md", base: "./src/content/pages" }),
   schema: z.object({
-    // Shared page fields
     title: z.string().nullish(),
     name: z.string().nullish(),
     description: z.string().nullish(),
@@ -69,7 +68,6 @@ const pages = defineCollection({
     layout: z.string().optional(),
     show_main: z.boolean().optional(),
     ideas_team: stringField,
-    // GSoC project-specific fields
     desc: z.string().nullish(),
     difficulty: stringField,
     requirements: stringListField,

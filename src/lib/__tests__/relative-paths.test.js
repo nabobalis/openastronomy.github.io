@@ -5,10 +5,6 @@ import {
   localizeHref,
 } from "../relative-paths.js";
 
-// ---------------------------------------------------------------------------
-// getRelativeRoot
-// ---------------------------------------------------------------------------
-
 describe("getRelativeRoot", () => {
   it("returns ./ for the root path", () => {
     expect(getRelativeRoot("/")).toBe("./");
@@ -39,10 +35,6 @@ describe("getRelativeRoot", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// fromSiteRoot
-// ---------------------------------------------------------------------------
-
 describe("fromSiteRoot", () => {
   it("builds a relative path from the root", () => {
     expect(fromSiteRoot("/members/", "/css/style.css")).toBe(
@@ -64,10 +56,6 @@ describe("fromSiteRoot", () => {
     );
   });
 });
-
-// ---------------------------------------------------------------------------
-// localizeHref
-// ---------------------------------------------------------------------------
 
 describe("localizeHref", () => {
   it("returns fragment-only hrefs unchanged", () => {
