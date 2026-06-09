@@ -1,0 +1,2 @@
+# Collapse the lock file in GitHub PR diffs.
+package-lock.json linguist-generated=true
