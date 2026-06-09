@@ -4,7 +4,6 @@ type PostEntry = {
   data: { date: string | number | Date };
 };
 
-/** Pads a number to 2 digits with a leading zero (e.g. 7 → "07"). */
 const pad2 = (value: number): string => String(value).padStart(2, "0");
 
 /**

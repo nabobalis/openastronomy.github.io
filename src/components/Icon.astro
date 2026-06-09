@@ -1,9 +1,7 @@
 ---
 /*
- * Icon - inline SVG from src/data/icons.json by key name.
- *
- * Each icon entry has `{ d, viewBox }`. The hamburger entry has `paths`
- * (an array) and is rendered inline by Header.astro directly, not via Icon.
+ * The hamburger entry in icons.json has `paths` (an array) instead of `d`
+ * and is rendered inline by Header.astro directly, not via this component.
  */
 import icons from "../data/icons.json";
 

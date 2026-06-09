@@ -1,9 +1,7 @@
 ---
-/**
- * Renders the project metadata block. Slot is the markdown body.
- *
+/*
  * Used inside <dialog> by ProjectDetail and as a standalone page section by
- * [...slug].astro for direct project URLs.
+ * [...slug].astro; the slot receives the rendered markdown body.
  */
 import type { ProjectMeta } from "../../lib/gsoc.ts";
 import { getProjectDetailRows } from "../../lib/gsoc.ts";

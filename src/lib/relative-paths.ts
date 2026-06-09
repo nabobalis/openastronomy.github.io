@@ -20,7 +20,6 @@ const PROTOCOL_RE = /^[a-zA-Z][a-zA-Z\d+\-.]*:/;
  *   `/gsoc/2025/` → `../../`
  */
 export const getRelativeRoot = (pathname: string = "/"): string => {
-  // Strip query string and hash before counting path segments.
   const cleanPath = String(pathname).split("?")[0].split("#")[0];
   const depth = cleanPath.split("/").filter(Boolean).length;
   return depth === 0 ? "./" : "../".repeat(depth);

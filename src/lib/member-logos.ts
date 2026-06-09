@@ -14,7 +14,6 @@ const logoModules = import.meta.glob<{ default: ImageMetadata }>(
 
 /**
  * Maps a bare filename (e.g. "sunpy.png") to its processed Astro ImageMetadata.
- * Throws at build time if a member's logo file is missing from the assets dir.
  */
 export const memberLogoMap = Object.fromEntries(
   Object.entries(logoModules).map(([path, mod]) => [

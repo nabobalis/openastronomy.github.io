@@ -1,17 +1,4 @@
 ---
-/*
- * Head - renders the <head> element for every page.
- *
- * Builds canonical URL, Open Graph tags, favicon, and a CSS stylesheet link.
- * Picks one of two background images at build time and bakes it into the <body>
- * background via an inline <style>, so there is no client-side flash.
- *
- * Props:
- *   pageTitle    - overrides site default
- *   description  - overrides site default
- *   pageType     - "website" (default) or "article" for blog posts
- *   publishedAt  - ISO date string for og:article:published_time
- */
 import site from "../data/site.json";
 import { fromSiteRoot } from "../lib/relative-paths.ts";
 import faviconAsset from "../assets/favicon.png";

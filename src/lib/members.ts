@@ -51,6 +51,10 @@ const socialBuilder: Record<string, (h: string) => MemberLink | null> = {
   },
 };
 
+/**
+ * Builds the icon links (repositories, mailing lists, chats, socials) shown
+ * on a member card. Unknown repository hosts fall back to the raw URL.
+ */
 export const buildMemberLinks = (details: MemberDetails): MemberLink[] => {
   const links: MemberLink[] = [];
   for (const [key, value] of Object.entries(details.repositories ?? {})) {
