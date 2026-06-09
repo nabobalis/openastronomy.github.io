@@ -20,11 +20,9 @@ mentors:
 # The programme under this project wish to run. At the moment only GSOC is available
 initiatives:
   - GSOC
-# Pick one size.
+# Pick one size and delete the others: 90 h (Small), 175 h (Medium), 350 h (Large)
 project_size:
-  - 90 h (Small)
   - 175 h (Medium)
-  - 350 h (Large)
 # Different technologies needed
 tags:
   - python
@@ -55,12 +53,13 @@ quam.
 
 ### Coding starts
 
-- Be awesome
+- Set up the development environment and reproduce issues locally.
+- Agree on the API design with mentors in a draft pull request.
 
 ### 1st evaluation
 
-- Have done awesome stuff.
+- Core implementation merged behind a feature flag, with unit tests.
 
 ### Final evaluation
 
-- Finished the awesome stuff.
+- Feature enabled by default, documentation and example gallery entry written.

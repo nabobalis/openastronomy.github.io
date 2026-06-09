@@ -16,8 +16,7 @@ First, we recommend you to carefully read [Google's notes for first year organiz
 Then, you need to be a member of the OpenAstronomy team.
 That process is simple (and free!).
 You need to be an open-development organization and be related with astronomy.
-Then make a pull-request to [our repository][OA repository] adding a logo, a short description, etc.
-Follow the instructions in the example at the bottom of [the `members.json` file][members PR].
+Then make a pull-request to [our repository][OA repository] that adds your organization to [the `members.json` file][members file] (name, website, short description, and links to your repositories, chat, and mailing lists, you can copy an existing entry as a starting point) and your logo image to [`src/assets/members/`][members logos].
 The steering council will review your application and give you feedback.
 
 Once a member, you can start the path to participate on GSoC!
@@ -61,6 +60,9 @@ Lastly, make sure to indicate the level of difficulty of the project.
 
 In case your project idea already has specific milestones, please add them so as to make contributors aware when they start writing their applications.
 If the project milestones are open ended and you would like to hear input from other members of the community, that is fine too!
+
+Please also publish an AI usage policy for your organization (or link your existing one) where applicants can find it.
+Our [contributor guidelines][contributor guidelines] tell applicants to assume AI-generated contributions are **not** allowed for any sub-org that has not published a policy.
 
 ### Mentors
 
@@ -153,7 +155,8 @@ If they are not followed the administrators will fail the contributors.
 [project template]: https://github.com/OpenAstronomy/openastronomy.github.io/blob/main/src/content/pages/gsoc/_project_template.md
 [Google's mentor guide]: https://google.github.io/gsocguides/mentor/
 [GSOC]: https://summerofcode.withgoogle.com/
-[members PR]: https://github.com/OpenAstronomy/openastronomy.github.io/blob/master/_data/members.yaml
+[members file]: https://github.com/OpenAstronomy/openastronomy.github.io/blob/main/src/data/members.json
+[members logos]: https://github.com/OpenAstronomy/openastronomy.github.io/tree/main/src/assets/members
 [ESA-SOCIS]: https://www.esa.int/Enabling_Support/Space_Engineering_Technology/SOCIS_The_ESA_Summer_of_Code_in_Space
 [Google-notes]: https://google.github.io/gsocguides/mentor/notes-for-first-year-organizations
 [PSF-sub-orgs]: https://python-gsoc.org/mentors.html#sub-orgs

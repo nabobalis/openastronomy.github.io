@@ -12,8 +12,8 @@ Google distributes funds to open software development organizations to recruit n
 You will get paid to write software at home (or wherever you like), with guidance from expert mentors distributed around the globe.
 
 To apply to be a GSoC contributor, you must write an application to [GSoC] for one or more OpenAstronomy project ideas.
-Each summer, [several projects][oa projects] are offered by [OpenAstronomy mentors][oa mentors], with well-defined scope and pre-requisite experience.
-If you are selected by OpenAstronomy, you will become a GSoC contributor.
+Each summer, [several projects][oa projects] are offered by OpenAstronomy mentors, with well-defined scope and pre-requisite experience.
+If you are selected by OpenAstronomy (and Google provides the requested number of slots), you will become a GSoC contributor.
 
 ## What is OpenAstronomy (OA)?
 
@@ -23,7 +23,8 @@ It coordinates mentors and projects for Google Summer of Code mentorships relate
 ## What is the application process?
 
 You must submit your application to the [Google Summer of Code][GSoC], but it is very important that you also share it well before the deadline with your potential project mentors and the rest of the community.
-They will be able to give you feedback before officially submitting it, but this is difficult to do if a propsoal draft is shared with less than 7 days before the deadline.
+They will be able to give you feedback before officially submitting it, but this is difficult to do if a proposal draft is shared less than 7 days before the deadline.
+The key dates for each edition are on the [official GSoC timeline].
 
 The [application] process is currently described by our [gsoc-proposals repository](https://github.com/OpenAstronomy/gsoc-proposals) and is required to be accepted.
 It is very possible that the project has its own template and you can use that when submitting to GSOC but for the gsoc-proposals repository, you must follow that template.
@@ -42,9 +43,39 @@ We are especially looking for individuals who are genuinely interested in develo
 You don't need to be a Python guru or an astronomical coordinate system expert to be eligible -- projects are available that cover a range of previous experience in Python and astronomy.
 Individuals from any background from anywhere around the world are encouraged to apply.
 
+## Frequently Asked Questions
+
+These are just a subset of common questions, see the [GSoC FAQ][gsoc-faq] for more questions.
+
+**Do I get paid?**
+
+Yes.
+Google pays a stipend directly to accepted contributors; the amount depends on the project size and your country.
+See the [GSoC FAQ][gsoc-faq] for the current figures.
+
+**How much time does it take?**
+
+Project ideas are sized as roughly 90 (small), 175 (medium), or 350 (large) hours of work spread over the coding period.
+Thee size is fixed by the project & mentors, only they can decide if the project can be shortened or extended.
+
+**Can I apply to more than one project?**
+
+Yes.
+GSoC allows up to three proposals per contributor, and they can be for different organizations.
+A single well-researched proposal usually beats three rushed ones.
+
+**Where do I ask questions?**
+
+General OpenAstronomy questions go to the [OpenAstronomy discourse](https://community.openastronomy.org).
+Project-specific questions go to that project's own chat — find the links on the [members page][oa members].
+
+**Where will my work be visible?**
+
+Accepted contributors write a blog post at least every two weeks; the feeds are collected on the [contributor blogs page](../../universe-oa/).
+
 ## Testimonials
 
-> In the summer after my second year of graudate school, I didn't have funding
+> In the summer after my second year of graduate school, I didn't have funding
 > to work on any projects in my home department. I applied and was selected for
 > GSoC 2015, and I worked with another student and several encouraging mentors on
 > developing a new astropy affiliated package, called
@@ -73,8 +104,9 @@ Now that you know you're a good candidate, check out the [GSoC Contributor Guide
 Also check out [the OpenAstronomy Contributor Guidelines.](../contributor_guidelines/)
 
 [GSoC]: https://summerofcode.withgoogle.com/
-[oa projects]: ../2026/
-[oa mentors]: ../2026/#mentors
+[oa projects]: ../#current-projects
+[official GSoC timeline]: https://developers.google.com/open-source/gsoc/timeline
+[gsoc-faq]: https://developers.google.com/open-source/gsoc/faq
 [astropy]: http://www.astropy.org
 [sunpy]: http://sunpy.org
 [oa members]: ../../members/

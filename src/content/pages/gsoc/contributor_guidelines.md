@@ -82,10 +82,20 @@ Some general pointers to follow are:
 3. **Submit your application.**
    Besides adding your proposal to the gsoc-proposals repository, you also need to [submit your application](https://summerofcode.withgoogle.com/) before the deadline.
    **You must submit it there.**
+   Do not leave it to the last minute: Google's, and Google does not extend their deadline for anyone.
+   If you want a review, you need to give mentors at least 7 days notice.
    Please include the sub-org name at the start of your proposal title as `[<sub-org>] <project name>`,
    where `<suborg>` should be the name of the sub-org in lower case (e.g., `sunpy`, `stingray`, `radis`),
    or the combination of two if it's the case (e.g., `astropy|sunpy`).
    Only proposals present in both the gsoc-proposals repository and the GSoC platform will be considered.
+
+### How are applications evaluated?
+
+Mentors grade each application on the quality and feasibility of the proposal, your engagement with the community so far, and the pull request(s) you submitted to the organization.
+The evaluation of a candidate has never been solely based on a proposal.
+This means that besides having a good proposal and demonstrating its understanding (through an interview or community interactions), everything such as: How the candidates interact with the community, answer to feedback, welcome and help other candidates to get started, and much more, counts!
+GSoC is not a competition or an internship/job, GSoC is a programme to build community and develop future maintainers.
+So we grade things in a different manner than say a University would.
 
 ### What are my obligations as a contributor during GSoC?
 
@@ -93,6 +103,7 @@ We expect you to:
 
 - Be online and active during your working hours in your sub-organization chat.
 - Publish a blog post at least once every two weeks.
+  Your blog's RSS feed is registered when you are accepted, and your posts are tracked on the [contributor blogs page](../../universe-oa/).
 - Participate in weekly meetings with your mentors.
 - Contact your mentors or OpenAstronomy admins early if any issues arise.
 

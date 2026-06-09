@@ -14,15 +14,14 @@ OpenAstronomy is an umbrella organization which collects project ideas from any 
 Contributor applications to OpenAstronomy projects follows the same rules as the [Python Software Foundation] and the [GSoC Contributor Guide].
 [We have also our own guide on what we consider a good application for OpenAstronomy.][OpenAstronomy Contributor Guide]
 
-All contributors blogs are collected on the [OpenAstronomy Universe] site.
-
 ## Quick Links
 
 - [OpenAstronomy Contributor Guide]
 - [GSoC Contributor Guide]
 - [Now You Know It!: Getting selected in Outreachy by Kriti Singh]
+- [OpenAstronomy Universe] - blogs from current GSoC contributors
 
-<h2 id="current-projects">Current Project ideas for GSoC  2026</h2>
+<h2 id="current-projects">Current Project ideas for GSoC 2026</h2>
 
 - [2026](./2026/)
 
