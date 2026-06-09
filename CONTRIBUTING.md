@@ -11,9 +11,9 @@ This document captures the conventions used in this codebase. When adding or rev
 | Context                                       | Convention                                                  | Example                                 |
 | --------------------------------------------- | ----------------------------------------------------------- | --------------------------------------- |
 | JavaScript/TypeScript variables and functions | camelCase                                                   | `getPostSlug`, `seasonKey`              |
-| TypeScript types and interfaces               | PascalCase                                                  | `ProjectData`, `MemberLink`             |
+| TypeScript types and interfaces               | PascalCase                                                  | `ProjectMeta`, `MemberLink`             |
 | Astro component files                         | PascalCase                                                  | `MemberCard.astro`, `ProjectCard.astro` |
-| CSS class names                               | kebab-case                                                  | `project-card`, `member-logo`           |
+| CSS class names                               | kebab-case                                                  | `gsoc-project-card`, `member-logo`      |
 | Constants that are never reassigned           | UPPER_SNAKE_CASE only when a regex or truly global constant | `PROTOCOL_RE`                           |
 
 ### Function length
@@ -26,18 +26,16 @@ This document captures the conventions used in this codebase. When adding or rev
 
 ## Documentation
 
-### `src/lib/` (`.ts` and `.js` files)
+### `src/lib/` (`.ts` files)
 
-Every **exported** symbol must have a JSDoc block:
+Every **exported** symbol must have a JSDoc block describing what it does. Types live in the TypeScript signatures, so `@param`/`@returns` tags are not needed:
 
-```js
+```ts
 /**
- * Strips the YYYY-MM-DD date prefix from a content collection entry ID.
- *
- * @param {import("astro:content").CollectionEntry<"posts">} entry
- * @returns {string} The slug without the date prefix, e.g. "my-post-title"
+ * Derives the URL slug for a post from its content collection entry.
+ * Filenames follow `YYYY-MM-DD-my-title.md`; the date prefix is stripped.
  */
-export function getPostSlug(entry) { … }
+export const getPostSlug = (entry: PostEntry): string => { … };
 ```
 
 Internal helpers (not exported) should have at least a brief inline comment if their purpose is not immediately obvious from the name.
@@ -62,8 +60,7 @@ Add a brief inline comment when test setup is non-obvious (e.g. a mock helper or
 
 ## TypeScript vs JavaScript
 
-- New files in `src/lib/` should be **TypeScript** (`.ts`).
-- Existing `.js` files in `src/lib/` stay as-is unless being rewritten from scratch.
+- `src/lib/` is **TypeScript** (`.ts`); new helpers go there as `.ts` files.
 - Astro component frontmatter uses TypeScript types inline where needed; avoid importing from Astro runtime packages inside `src/lib/` files (keeps them unit-testable without Astro's runtime).
 
 ---
@@ -84,7 +81,7 @@ Add a brief inline comment when test setup is non-obvious (e.g. a mock helper or
 ## Astro components
 
 - Keep frontmatter focused on **data fetching and transformation**. Move reusable logic into `src/lib/`.
-- All internal links must use `fromSiteRoot(Astro.url.pathname, "/target/")` from `src/lib/relative-paths.js`. Hardcoded absolute paths (`/foo/`) break on preview deployments.
+- All internal links must use `fromSiteRoot(Astro.url.pathname, "/target/")` from `src/lib/relative-paths.ts`. Hardcoded absolute paths (`/foo/`) break on preview deployments.
 - Format with Prettier and lint with ESLint before committing. Run locally before pushing:
 
   ```sh
@@ -121,27 +118,22 @@ All jobs must pass before merging. The `linkcheck` job waits for `build` and all
 
 ---
 
-## Syncing content from upstream
+## Adding GSoC content
 
-This fork rewrote the site from Jekyll (the upstream) to Astro. The two branches have permanently diverged — **never run `git merge upstream/main`**, it would restore all the old Jekyll files.
+GSoC project ideas live in `src/content/pages/gsoc/<year>/<suborg>/<file>.md`.
 
-When upstream adds or updates GSoC project files, port them manually:
+To add a new project idea:
 
-```bash
-# Fetch the latest upstream changes
-git fetch upstream
+1. Copy the template at `src/content/pages/gsoc/_project_template.md` to `src/content/pages/gsoc/<year>/<suborg>/<file>.md`.
+2. Fill in the frontmatter. The schema is defined and validated in `src/content.config.ts` — the build fails on malformed fields.
 
-# See which _projects/ files changed in upstream since the last sync
-git log upstream/main ^main --oneline --name-status | grep "_projects"
-```
+For a new season, also:
 
-For each new or updated `_projects/<year>/<suborg>/<file>.md` in upstream:
+1. Create `src/content/pages/gsoc/<year>/index.md` (the season page at `/gsoc/<year>/` is generated from it).
+2. Add the season admins to `src/data/gsoc-admins.json`.
+3. Update `src/data/universe/seasons.yml` with the season's posting windows and contributor feeds once contributors are selected (see `src/data/universe/README.md`).
 
-1. Find the corresponding Astro file at `src/content/pages/gsoc/<year>/<suborg>/<file>.md`
-2. Apply the content changes (keep the Astro YAML indentation style)
-3. If the file is brand new, create it — the frontmatter schema is defined in `src/content/config.ts` and the template is at `src/content/pages/gsoc/_project_template.md`
-
-Other upstream changes (e.g. to `gsoc/display/resources/js/app.js`, `_layouts/`, `_sass/`) belong to the old Jekyll site and can be safely ignored.
+Project cards, detail dialogs, and the mentors list are generated automatically from the project files; no route or layout changes are needed.
 
 ---
 
@@ -166,5 +158,7 @@ npm run build && npm test
 ```
 
 Commit both `package.json` and `package-lock.json` together. If `npm run build` or `npm test` fails after the update, check the changelog for the offending package and either fix the issue or pin that package back to the previous version.
+
+The `overrides` field in `package.json` forces the `yaml` copy nested inside `yaml-language-server` (pulled in by `@astrojs/check`) to match our top-level `yaml` version, because older releases have a known vulnerability. When updating dependencies, check whether the override is still needed (`npm audit` after removing it).
 
 **Security alerts**: if GitHub raises a Dependabot security alert for a specific npm package, fix that immediately regardless of the regular update schedule.

@@ -2,9 +2,8 @@
 
 This directory configures the `/universe-oa/` contributor blog page.
 
-The old `Universe_OA` repository generated a separate Nikola site. In this
-Astro site, feed checks run during the normal static build instead. The built
-HTML contains the feed status from the most recent build.
+Feed checks run during the static build. The built HTML contains the feed
+status from the most recent build.
 
 ## Files
 
@@ -69,8 +68,9 @@ ignored if present. For the latest season, the first window must set
 The page is static. Feeds are fetched during `npm run build`, not when a user
 loads the page.
 
-The GitHub Actions workflow has a daily cron trigger so the static page is
-rebuilt and refreshed regularly.
+The GitHub Actions CI workflow has a daily cron trigger, so the build (and
+with it the feed check) is exercised every day. The live page only updates
+when a fresh build is deployed.
 
 ## Archive
 

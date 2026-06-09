@@ -65,7 +65,7 @@ export const isSkippable = (link) => {
 export const resolveInternal = (link, current, rootPath) => {
   const [pathPartRaw, hashPart = ""] = link.split("#");
   const pathPart = pathPartRaw.split("?")[0];
-  let anchor = "";
+  let anchor;
   try {
     anchor = decodeURIComponent(hashPart);
   } catch {

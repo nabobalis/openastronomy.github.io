@@ -8,7 +8,12 @@
   --color-heading-link: #2b3990;
   --color-heading-link-hover: #c26d17;
   --color-nav-hover: #e15f5f;
-  --color-icon: #333333;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 body {
@@ -16,7 +21,6 @@ body {
   font-size: 1.05rem;
   color: var(--color-text);
   margin: 0;
-  padding-bottom: 0;
   background-image: var(--page-bg);
   background-size: 100%;
   background-repeat: no-repeat;
@@ -50,7 +54,7 @@ h4,
 h5,
 h6 {
   color: var(--color-text);
-  font-family: "Fira Sans", "Helvetica", "Arial";
+  font-family: "Fira Sans", Helvetica, Arial, sans-serif;
 }
 
 h1,
@@ -99,13 +103,13 @@ blockquote {
   width: 90%;
 }
 
-blockquote.testimonial cite {
-  font-style: italic;
+.post-meta {
+  color: #5c5c5c;
+  font-size: 0.9rem;
 }
 
 .container {
   width: min(var(--site-content-max-width), 100%);
-  max-width: var(--site-content-max-width);
   margin: 0 auto;
 }
 
@@ -119,7 +123,6 @@ blockquote.testimonial cite {
   justify-content: center;
   gap: 32px;
   padding: 0 32px;
-  box-sizing: border-box;
 }
 
 .site-header .site-title {
@@ -176,7 +179,6 @@ blockquote.testimonial cite {
 
 .page-content .container {
   padding: 0 32px;
-  box-sizing: border-box;
 }
 
 .fixed-wrap > .page-content {

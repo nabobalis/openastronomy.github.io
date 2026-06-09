@@ -3,8 +3,8 @@
 This is the source code for the [openastronomy.org](https://openastronomy.org)
 website. The site is built with Astro and outputs static HTML to `html/`.
 
-For code style, CI details, upstream sync notes, and dependency update guidance,
-see [CONTRIBUTING.md](CONTRIBUTING.md).
+For code style, CI details, the GSoC content workflow, and dependency update
+guidance, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Requirements
 
@@ -127,7 +127,8 @@ Supported environment variable:
 
 GitHub Actions (`.github/workflows/ci.yml`) is the merge quality gate. It runs
 formatting, source lint, Markdown lint, Astro checks, unit tests, a production
-build, and an internal link/anchor check.
+build, and an internal link/anchor check. A daily scheduled run keeps the
+build and the `/universe-oa/` feed check exercised.
 
 CircleCI (`.circleci/config.yml`) builds the site and publishes the `html/`
 artifact for pull-request preview.
@@ -148,5 +149,6 @@ artifact for pull-request preview.
 - `src/lib/` contains reusable JavaScript and TypeScript helpers plus unit
   tests.
 - `src/pages/` contains Astro routes.
-- `src/styles/` contains global CSS.
+- `src/styles/` contains site-wide CSS (`global.css`) and per-page stylesheets
+  for the GSoC and universe-oa pages.
 - `scripts/` contains maintenance scripts such as the link checker.

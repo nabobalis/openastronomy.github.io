@@ -6,19 +6,19 @@ import rawMembers from "../data/members.json";
 
 const memberSchema = z.object({
   name: z.string(),
-  url: z.string().url(),
+  url: z.url(),
   logo: z.string(),
   description: z.string().optional(),
-  repositories: z.record(z.string()).optional(),
-  mailinglists: z.record(z.string()).optional(),
-  chats: z.record(z.string()).optional(),
-  socials: z.record(z.string()).optional(),
+  repositories: z.record(z.string(), z.string()).optional(),
+  mailinglists: z.record(z.string(), z.string()).optional(),
+  chats: z.record(z.string(), z.string()).optional(),
+  socials: z.record(z.string(), z.string()).optional(),
 });
 
 export type MemberDetails = z.infer<typeof memberSchema>;
 
 export const members: Record<string, MemberDetails> = z
-  .record(memberSchema)
+  .record(z.string(), memberSchema)
   .parse(rawMembers);
 
 const memberKeysByLowercase = new Map(

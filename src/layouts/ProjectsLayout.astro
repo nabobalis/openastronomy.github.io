@@ -58,46 +58,46 @@ const sections = [
 ---
 
 <BaseLayout title={pageTitle}>
-  <div class="projects">
-    <nav class="gsoc-tabs">
-      {sections.map((s) => <a href={`#${s.id}`}>{s.label}</a>)}
-    </nav>
+  <nav class="gsoc-tabs">
+    {sections.map((s) => <a href={`#${s.id}`}>{s.label}</a>)}
+  </nav>
 
-    <section id="projects">
-      <h2>
-        <a class="gsoc-section-link" href="#projects">{sections[0].heading}</a>
-      </h2>
-      {projects.length === 0 ? <p>No projects listed yet.</p> : null}
-      <div class="gsoc-projects-grid">
-        {projects.map((project) => <ProjectCard project={project} />)}
-      </div>
-      {projects.map((project) => <ProjectDetail project={project} />)}
-    </section>
+  <section id="projects">
+    <h2>
+      <a class="gsoc-section-link" href="#projects">{sections[0].heading}</a>
+    </h2>
+    {projects.length === 0 ? <p>No projects listed yet.</p> : null}
+    <div class="gsoc-projects-grid">
+      {projects.map((project) => <ProjectCard project={project} />)}
+    </div>
+    {projects.map((project) => <ProjectDetail project={project} />)}
+  </section>
 
-    <PeopleSection
-      id="mentors"
-      heading={sections[1].heading}
-      intro={`We are the mentors for OpenAstronomy in GSoC ${seasonKey}.`}
-      handles={mentors}
-    />
-    <PeopleSection
-      id="admins"
-      heading={sections[2].heading}
-      intro="We are the admins for OpenAstronomy."
-      handles={adminHandles}
-    />
-  </div>
-</BaseLayout>
+  <PeopleSection
+    id="mentors"
+    heading={sections[1].heading}
+    intro={`We are the mentors for OpenAstronomy in GSoC ${seasonKey}.`}
+    handles={mentors}
+  />
+  <PeopleSection
+    id="admins"
+    heading={sections[2].heading}
+    intro="We are the admins for OpenAstronomy."
+    handles={adminHandles}
+  />
 
-<script>
-  document
-    .querySelectorAll<HTMLButtonElement>(".gsoc-project-card-open[data-detail]")
-    .forEach((button) => {
-      const detailId = button.dataset.detail;
-      if (!detailId) return;
-      button.addEventListener("click", () => {
-        const dialog = document.getElementById(detailId);
-        if (dialog instanceof HTMLDialogElement) dialog.showModal();
+  <script>
+    document
+      .querySelectorAll<HTMLButtonElement>(
+        ".gsoc-project-card-open[data-detail]",
+      )
+      .forEach((button) => {
+        const detailId = button.dataset.detail;
+        if (!detailId) return;
+        button.addEventListener("click", () => {
+          const dialog = document.getElementById(detailId);
+          if (dialog instanceof HTMLDialogElement) dialog.showModal();
+        });
       });
-    });
-</script>
+  </script>
+</BaseLayout>
