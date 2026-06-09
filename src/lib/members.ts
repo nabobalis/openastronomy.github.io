@@ -21,6 +21,14 @@ export const members: Record<string, MemberDetails> = z
   .record(memberSchema)
   .parse(rawMembers);
 
+const memberKeysByLowercase = new Map(
+  Object.keys(members).map((key) => [key.toLowerCase(), key]),
+);
+
+/** Resolves a members.json key case-insensitively (e.g. "SunPy" → "sunpy"). */
+export const findMemberKey = (key: string): string | undefined =>
+  memberKeysByLowercase.get(key.toLowerCase());
+
 export type MemberLink = {
   href: string;
   label: string;

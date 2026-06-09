@@ -12,49 +12,22 @@ const posts = defineCollection({
   }),
 });
 
-const scalarToString = (value: unknown) =>
-  typeof value === "string" || typeof value === "number"
-    ? String(value)
-    : value;
-
-const listItemToString = (value: unknown) => {
-  const scalar = scalarToString(value);
-  if (
-    scalar !== value ||
-    scalar === null ||
-    scalar === undefined ||
-    Array.isArray(scalar) ||
-    typeof scalar !== "object"
-  ) {
-    return scalar;
-  }
-
-  const entries = Object.entries(scalar);
-  if (entries.length !== 1) return scalar;
-
-  const [[key, entryValue]] = entries;
-  const normalizedValue = scalarToString(entryValue);
-  return typeof normalizedValue === "string"
-    ? `${key}: ${normalizedValue}`
-    : scalar;
-};
-
+// Project frontmatter often leaves fields empty (the template ships them
+// commented out), so treat null/empty values as absent instead of failing.
 const stringField = z
-  .preprocess((value) => {
-    if (value === null || value === undefined || value === "") return undefined;
-    return scalarToString(value);
-  }, z.string().optional())
+  .preprocess(
+    (value) => (value === null || value === "" ? undefined : value),
+    z.string().optional(),
+  )
   .optional();
 
 const stringListField = z
   .preprocess((value) => {
     if (value === null || value === undefined || value === "") return undefined;
-    if (Array.isArray(value)) {
-      return value
-        .map(listItemToString)
-        .filter((item) => item !== null && item !== undefined && item !== "");
-    }
-    return [scalarToString(value)];
+    const items = Array.isArray(value) ? value : [value];
+    return items.filter(
+      (item) => item !== null && item !== undefined && item !== "",
+    );
   }, z.array(z.string()).optional())
   .optional();
 

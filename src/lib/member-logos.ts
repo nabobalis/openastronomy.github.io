@@ -5,7 +5,7 @@
  * avoids duplicating the map construction for every member on the page.
  */
 import type { ImageMetadata } from "astro";
-import { members } from "./members.ts";
+import { findMemberKey, members } from "./members.ts";
 
 const logoModules = import.meta.glob<{ default: ImageMetadata }>(
   "../assets/members/*.{png,jpg,jpeg,webp,avif}",
@@ -30,9 +30,7 @@ export const memberLogoMap = Object.fromEntries(
 export const resolveProjectDisplay = (
   project: string,
 ): { name: string; logo: ImageMetadata | null } => {
-  const key = Object.keys(members).find(
-    (memberKey) => memberKey.toLowerCase() === project.toLowerCase(),
-  );
+  const key = findMemberKey(project);
   const details = key ? members[key] : null;
   return {
     name: details?.name ?? project,

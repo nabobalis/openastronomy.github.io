@@ -4,11 +4,12 @@
  * No Astro-runtime imports here so the helpers stay unit-testable.
  */
 
-import { slugify } from "./relative-paths.ts";
+import { fromSiteRoot, slugify } from "./relative-paths.ts";
 
 export type AstroComponentFactory = (...args: unknown[]) => unknown;
 
-export type MemberLink = {
+/** Link to a collaborating member project; `href` is null for non-members. */
+export type CollaboratorLink = {
   label: string;
   href: string | null;
 };
@@ -25,7 +26,7 @@ export type ProjectMeta = {
   initiatives: string[];
   projectSize: string[];
   tags: string[];
-  collaborators: MemberLink[];
+  collaborators: CollaboratorLink[];
   issues: string[];
 };
 
@@ -56,8 +57,20 @@ export const normalizeArray = (value: unknown): string[] => {
     });
 };
 
-const memberLookupKeys = (memberLookup: Record<string, { name?: string }>) =>
-  new Map(Object.keys(memberLookup).map((key) => [key.toLowerCase(), key]));
+// Cached per lookup object: formatMemberLink runs once per collaborator and
+// would otherwise rebuild the lowercase-key map on every call.
+const memberKeyCache = new WeakMap<object, Map<string, string>>();
+
+const memberLookupKeys = (memberLookup: Record<string, { name?: string }>) => {
+  let keys = memberKeyCache.get(memberLookup);
+  if (!keys) {
+    keys = new Map(
+      Object.keys(memberLookup).map((key) => [key.toLowerCase(), key]),
+    );
+    memberKeyCache.set(memberLookup, keys);
+  }
+  return keys;
+};
 
 /**
  * Resolves a `collaborating_projects` key to a display label + optional
@@ -68,8 +81,7 @@ export const formatMemberLink = (
   key: string,
   memberLookup: Record<string, { name?: string }>,
   pagePath: string,
-  fromSiteRoot: (pathname: string, targetPath: string) => string,
-): MemberLink => {
+): CollaboratorLink => {
   const memberKey =
     memberLookupKeys(memberLookup).get(key.toLowerCase()) ?? key;
   const member = memberLookup[memberKey];
@@ -132,7 +144,6 @@ export const buildProjectMeta = (
   pathInfo: { year: string; suborg: string; fileSlug: string },
   memberLookup: Record<string, { name?: string }>,
   pagePath: string,
-  fromSiteRoot: (pathname: string, targetPath: string) => string,
 ): ProjectMeta => {
   const name =
     typeof data.name === "string" && data.name.trim()
@@ -153,7 +164,7 @@ export const buildProjectMeta = (
     projectSize: normalizeArray(data.project_size),
     tags: normalizeArray(data.tags),
     collaborators: normalizeArray(data.collaborating_projects).map((key) =>
-      formatMemberLink(key, memberLookup, pagePath, fromSiteRoot),
+      formatMemberLink(key, memberLookup, pagePath),
     ),
     issues: normalizeArray(data.issues),
   };

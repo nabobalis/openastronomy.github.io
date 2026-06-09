@@ -6,7 +6,6 @@ import ProjectDetail from "../components/gsoc/ProjectDetail.astro";
 import PeopleSection from "../components/gsoc/PeopleSection.astro";
 import admins from "../data/gsoc-admins.json";
 import { members } from "../lib/members.ts";
-import { fromSiteRoot } from "../lib/relative-paths.ts";
 import {
   buildProjectMeta,
   parseProjectId,
@@ -35,13 +34,7 @@ const seasonEntries: SeasonEntry[] = pageEntries.flatMap(
 const projects: GsocProject[] = (
   await Promise.all(
     seasonEntries.map(async ({ entry, info }: SeasonEntry) => {
-      const meta = buildProjectMeta(
-        entry.data,
-        info,
-        members,
-        pagePath,
-        fromSiteRoot,
-      );
+      const meta = buildProjectMeta(entry.data, info, members, pagePath);
       const { Content } = await render(entry);
       return { ...meta, Content };
     }),

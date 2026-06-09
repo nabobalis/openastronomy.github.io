@@ -3,7 +3,8 @@ import { Image } from "astro:assets";
 import PageLayout from "../../layouts/PageLayout.astro";
 import { localizeHref } from "../../lib/relative-paths.ts";
 import { resolveProjectDisplay } from "../../lib/member-logos.ts";
-import { getBlogUrl, loadUniverseConfig } from "../../lib/universe.ts";
+import { getBlogUrl } from "../../lib/feeds.ts";
+import { loadUniverseConfig } from "../../lib/universe-config.ts";
 import "../../styles/universe.css";
 
 const pagePath = Astro.url.pathname;
