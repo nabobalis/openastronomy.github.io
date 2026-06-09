@@ -154,8 +154,17 @@ npx npm-check-updates -u
 npm install
 
 # Verify nothing broke
-npm run build && npm test
+npm run build && npm test && npm run check && npm run format:check
 ```
+
+If `npm install` reports a peer-dependency conflict that looks wrong (a plugin that does support the new version being rejected), the stale lock file is usually the cause — regenerate it:
+
+```bash
+rm -rf node_modules package-lock.json
+npm install
+```
+
+Major-version bumps usually need migration steps; the error messages typically link the package's upgrade guide.
 
 Commit both `package.json` and `package-lock.json` together. If `npm run build` or `npm test` fails after the update, check the changelog for the offending package and either fix the issue or pin that package back to the previous version.
 
